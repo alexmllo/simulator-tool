@@ -1,0 +1,59 @@
+{
+  "capacity_per_day": 10,
+  "models": {
+    "P3D-Classic": {
+      "bom": {
+        "kit_piezas": 1,
+        "pcb_ref_CTRL_V2": 1,
+        "extrusor": 1,
+        "cables_conexion": 2,
+        "transformador_24v": 1,
+        "enchufe_schuko": 1
+      }
+    },
+    "P3D-Pro": {
+      "bom": {
+        "kit_piezas": 1,
+        "pcb_ref_CTRL_V3": 1,
+        "extrusor": 1,
+        "sensor_autonivel": 1,
+        "cables_conexion": 3,
+        "transformador_24v": 1,
+        "enchufe_schuko": 1
+      }
+    }
+  },
+  "plan": [
+    {
+      "day": 1,
+      "orders": [
+        {
+          "model": "P3D-Classic",
+          "quantity": 8
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "orders": [
+        {
+          "model": "P3D-Classic",
+          "quantity": 5
+        },
+        {
+          "model": "P3D-Pro",
+          "quantity": 4
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "orders": [
+        {
+          "model": "P3D-Pro",
+          "quantity": 10
+        }
+      ]
+    }
+  ]
+}
