@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 import os
 
 Base = declarative_base()
-DB_PATH = "../data/simulator.db"
+DB_PATH = "data/simulator.db"
 DB_FILE = "sqlite:///"+DB_PATH
 
 engine = create_engine(DB_FILE, connect_args={"check_same_thread": False})
