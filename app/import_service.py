@@ -19,18 +19,26 @@ def import_simulation_from_json(json_path: str):
 
     for model_name, model_data in config.models.items():
         # Insertar producto terminado
-        product = Product(name=model_name, type="finished")
-        db.add(product)
-        db.flush()  # para obtener el id antes del commit
-        product_ids[model_name] = product.id
+        existing = db.query(Product).filter_by(name=model_name).first()
+        if existing:
+            product_ids[model_name] = existing.id
+        else:
+            product = Product(name=model_name, type="finished")
+            db.add(product)
+            db.flush()
+            product_ids[model_name] = product.id
 
         # Insertar materias primas si no existen
         for material_name in model_data.bom:
             if material_name not in product_ids:
-                raw_product = Product(name=material_name, type="raw")
-                db.add(raw_product)
-                db.flush()
-                product_ids[material_name] = raw_product.id
+                existing = db.query(Product).filter_by(name=material_name).first()
+                if existing:
+                    product_ids[material_name] = existing.id
+                else:
+                    raw_product = Product(name=material_name, type="raw")
+                    db.add(raw_product)
+                    db.flush()
+                    product_ids[material_name] = raw_product.id
 
         # Insertar BOMs
         for material_name, qty in model_data.bom.items():

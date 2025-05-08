@@ -55,15 +55,15 @@ class PurchaseOrder(Base):
     supplier_id = Column(Integer, ForeignKey("supplier.id"))
     product_id = Column(Integer, ForeignKey("product.id"))
     quantity = Column(Integer)
-    issue_date = Column(Date)
-    expected_delivery_date = Column(Date)
+    issue_date = Column(Integer)
+    expected_delivery_date = Column(Integer)
     status = Column(String)  # pending, delivered, cancelled
 
 
 class ProductionOrder(Base):
     __tablename__ = "production_order"
     id = Column(Integer, primary_key=True, index=True)
-    creation_date = Column(Date)
+    creation_date = Column(Integer)
     product_id = Column(Integer, ForeignKey("product.id"))
     quantity = Column(Integer)
     status = Column(String)  # pending, in_progress, completed, cancelled

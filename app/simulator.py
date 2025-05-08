@@ -1,19 +1,19 @@
 import simpy 
-from database import get_session, Inventory, DailyPlan, Product, ProductionOrder, PurchaseOrder, Event 
+from database import get_session, Inventory, DailyPlan, Product, ProductionOrder, PurchaseOrder, Event, BOM
 from sqlalchemy.orm import Session 
 from datetime import datetime, timedelta
 
 class SimulationEngine:
-  def init(self, db: Session): 
+  def __init__(self, db: Session): 
     self.env = simpy.Environment() 
     self.db = db 
-    self.current_day = 0 
+    self.current_day = 1
     self.capacity_per_day = 10 # esto luego puede venir de configuración
 
   def run_one_day(self):
     print(f"🕒 Ejecutando día {self.current_day}...")
     self.env.process(self.process_day(self.current_day))
-    self.env.run(until=self.env.now + 1)
+    self.env.run()
     self.current_day += 1
 
   def process_day(self, day: int):
@@ -21,15 +21,16 @@ class SimulationEngine:
 
       self.log_event("start_day", day, f"Inicio del día {day}")
 
-      self.handle_arrivals(day)
-      self.handle_plan_orders(day)
-      self.execute_production(day)
+      yield self.env.process(self.handle_arrivals(day))
+      yield self.env.process(self.handle_daily_plan(day))
+      yield self.env.process(self.execute_production(day))
 
       self.log_event("end_day", day, f"Fin del día {day}")
 
   def handle_arrivals(self, day: int):
       """Procesa entregas programadas para el día actual"""
-      current_date = datetime.today().date() + timedelta(days=day)
+      yield self.env.timeout(0)
+      current_date = day
       deliveries = self.db.query(PurchaseOrder).filter(
           PurchaseOrder.expected_delivery_date == current_date,
           PurchaseOrder.status == "pending"
@@ -55,38 +56,71 @@ class SimulationEngine:
 
       self.db.commit()
 
-  def handle_plan_orders(self, day: int):
-      """Procesa los pedidos del plan del día"""
-      plan_items = self.db.query(DailyPlan).filter_by(day=day).all()
-      if not plan_items:
-          self.log_event("plan_empty", day, f"No hay pedidos programados para el día {day}")
-          return
+  def handle_daily_plan(self, day: int):
+    """Procesa los pedidos del plan del día"""
+    yield self.env.timeout(0)
+    plan_items = self.db.query(DailyPlan).filter_by(day=day).all()
+    if not plan_items:
+        self.log_event("plan_empty", day, f"No hay pedidos programados para el día {day}")
+        return
 
-      for item in plan_items:
-          product = self.db.query(Product).filter_by(name=item.model, type="finished").first()
-          if not product:
-              self.log_event("error", day, f"Modelo '{item.model}' no encontrado como producto terminado")
-              continue
+    for item in plan_items:
+        product = self.db.query(Product).filter_by(name=item.model, type="finished").first()
+        if not product:
+            self.log_event("error", day, f"Modelo '{item.model}' no encontrado como producto terminado")
+            continue
 
-          production_order = ProductionOrder(
-              creation_date=datetime.today().date() + timedelta(days=day),
-              product_id=product.id,
-              quantity=item.quantity,
-              status="pending"
-          )
-          self.db.add(production_order)
+        # Verificar inventario actual
+        inventory = self.db.query(Inventory).filter_by(product_id=product.id).first()
+        stock_qty = inventory.quantity if inventory else 0
 
-          self.log_event(
-              "production_order",
-              day,
-              f"Orden de producción creada: {item.quantity} unidades de {item.model}"
-          )
+        if stock_qty >= item.quantity:
+            # Suficiente stock, despachar directamente
+            inventory.quantity -= item.quantity
+            self.log_event(
+                "order_fulfilled_from_stock",
+                day,
+                f"Pedido de {item.quantity} unidades de {item.model} cumplido desde inventario"
+            )
+        else:
+            # Despachar lo que se pueda y crear orden por el faltante
+            if stock_qty > 0:
+                inventory.quantity = 0
+                self.log_event(
+                    "partial_order_from_stock",
+                    day,
+                    f"{stock_qty} unidades de {item.model} despachadas desde stock, se producirán {item.quantity - stock_qty} más"
+                )
+            else:
+                self.log_event(
+                    "stock_empty",
+                    day,
+                    f"No hay stock de {item.model}, se producirán {item.quantity} unidades"
+                )
 
-      self.db.commit()
+            quantity_to_produce = item.quantity - stock_qty
+
+            production_order = ProductionOrder(
+                creation_date=day,
+                product_id=product.id,
+                quantity=quantity_to_produce,
+                status="pending"
+            )
+            self.db.add(production_order)
+
+            self.log_event(
+                "production_order_created",
+                day,
+                f"Orden de producción creada: {quantity_to_produce} unidades de {item.model}"
+            )
+
+    self.db.commit()
+
 
 
   def execute_production(self, day: int):
       """Produce hasta agotar la capacidad"""
+      yield self.env.timeout(0)
       capacity_left = self.capacity_per_day
       orders = self.db.query(ProductionOrder).filter_by(status="pending").order_by(ProductionOrder.id).all()
 
@@ -133,6 +167,7 @@ class SimulationEngine:
 
 
   def log_event(self, type_: str, sim_date: int, detail: str):
+    try:
       event = Event(
           type=type_,
           sim_date=sim_date,
@@ -140,3 +175,8 @@ class SimulationEngine:
       )
       self.db.add(event)
       self.db.commit()
+    except Exception as e:
+      print(f"⚠️ Error al guardar evento: {type_} | Día: {sim_date} | Detalle: {detail}")
+      print(f"Excepción original: {e}")
+      self.db.rollback()
+      raise
