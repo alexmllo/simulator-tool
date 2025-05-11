@@ -1,0 +1,51 @@
+{
+    "providers": [
+        {
+            "name": "ElectroComponents",
+            "materials": {
+                "pcb_ref_CTRL_V2": {
+                    "unit_cost": 45.0,
+                    "lead_time_days": 3
+                },
+                "pcb_ref_CTRL_V3": {
+                    "unit_cost": 55.0,
+                    "lead_time_days": 3
+                },
+                "transformador_24v": {
+                    "unit_cost": 35.0,
+                    "lead_time_days": 2
+                },
+                "enchufe_schuko": {
+                    "unit_cost": 8.0,
+                    "lead_time_days": 1
+                }
+            }
+        },
+        {
+            "name": "MecanicaPrecision",
+            "materials": {
+                "kit_piezas": {
+                    "unit_cost": 90.0,
+                    "lead_time_days": 4
+                },
+                "extrusor": {
+                    "unit_cost": 75.0,
+                    "lead_time_days": 3
+                },
+                "sensor_autonivel": {
+                    "unit_cost": 45.0,
+                    "lead_time_days": 2
+                }
+            }
+        },
+        {
+            "name": "CableTech",
+            "materials": {
+                "cables_conexion": {
+                    "unit_cost": 12.0,
+                    "lead_time_days": 1
+                }
+            }
+        }
+    ]
+} 

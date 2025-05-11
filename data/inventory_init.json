@@ -1,0 +1,10 @@
+{
+    "kit_piezas": 30,
+    "pcb_ref_CTRL_V2": 15,
+    "pcb_ref_CTRL_V3": 15,
+    "extrusor": 20,
+    "sensor_autonivel": 10,
+    "cables_conexion": 50,
+    "transformador_24v": 25,
+    "enchufe_schuko": 30
+} 

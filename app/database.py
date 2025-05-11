@@ -2,8 +2,6 @@ from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Date, ForeignKey, Table, Text
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
 import os
 
 Base = declarative_base()
@@ -54,6 +52,7 @@ class PurchaseOrder(Base):
     id = Column(Integer, primary_key=True, index=True)
     supplier_id = Column(Integer, ForeignKey("supplier.id"))
     product_id = Column(Integer, ForeignKey("product.id"))
+    plan_id = Column(Integer, ForeignKey("daily_plan.id"))  # Link to the plan this purchase is for
     quantity = Column(Integer)
     issue_date = Column(Integer)
     expected_delivery_date = Column(Integer)
@@ -67,6 +66,7 @@ class ProductionOrder(Base):
     product_id = Column(Integer, ForeignKey("product.id"))
     quantity = Column(Integer)
     status = Column(String)  # pending, in_progress, completed, cancelled
+    expected_completion_date = Column(Integer)
 
 
 class Event(Base):
@@ -83,6 +83,7 @@ class DailyPlan(Base):
     day = Column(Integer)
     model = Column(String)
     quantity = Column(Integer)
+    status = Column(String, default="pending")  # pending, fulfilled, cancelled
 
 
 # --- INICIALIZACIÓN ---
