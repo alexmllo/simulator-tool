@@ -1,19 +1,40 @@
 import simpy 
-from database import Inventory, DailyPlan, Product, ProductionOrder, PurchaseOrder, Event, BOM, Supplier
+import random
+from database import Inventory, DailyPlan, Product, ProductionOrder, PurchaseOrder, Event, BOM, Supplier, SimulationState
 from sqlalchemy.orm import Session 
 
 class SimulationEngine:
     def __init__(self, db: Session): 
         self.env = simpy.Environment() 
         self.db = db 
-        self.current_day = 1
+        
+        # Load current day from database
+        state = self.db.query(SimulationState).first()
+        if state:
+            self.current_day = state.current_day
+        else:
+            # Initialize if not exists
+            state = SimulationState(current_day=1)
+            self.db.add(state)
+            self.db.commit()
+            self.current_day = 1
+        
         self.capacity_per_day = 10
+        self.min_daily_orders = 1  # Minimum number of orders per day
+        self.max_daily_orders = 2  # Maximum number of orders per day
+        self.min_order_quantity = 1  # Minimum quantity per order
+        self.max_order_quantity = 10  # Maximum quantity per order
 
     def run_one_day(self):
         print(f"🕒 Ejecutando día {self.current_day}...")
         self.env.process(self.process_day(self.current_day))
         self.env.run()
         self.current_day += 1
+        
+        # Save current day to database
+        state = self.db.query(SimulationState).first()
+        state.current_day = self.current_day
+        self.db.commit()
 
     def process_day(self, day: int):
         yield self.env.timeout(0)
@@ -22,10 +43,55 @@ class SimulationEngine:
         # First handle arrivals from previous day's production and purchases
         yield self.env.process(self.handle_arrivals(day))
         
+        # Check if we need to generate a new plan
+        yield self.env.process(self.check_and_generate_plan(day))
+        
         # Then execute production orders for today
         yield self.env.process(self.execute_production(day))
 
         self.log_event("end_day", day, f"Fin del día {day}")
+
+    def check_and_generate_plan(self, day: int):
+        """Check if we need to generate a new plan for the next day"""
+        yield self.env.timeout(0)
+        
+        # Check if we have a plan for tomorrow
+        tomorrow_plan = self.db.query(DailyPlan).filter(DailyPlan.day == day + 1).first()
+        if tomorrow_plan:
+            return
+            
+        # Get all finished products
+        finished_products = self.db.query(Product).filter_by(type="finished").all()
+        if not finished_products:
+            self.log_event("error", day, "No hay productos finales disponibles para generar plan")
+            return
+            
+        # Generate random number of orders for tomorrow
+        num_orders = random.randint(self.min_daily_orders, self.max_daily_orders)
+        
+        # Generate random orders
+        for _ in range(num_orders):
+            # Select random product
+            product = random.choice(finished_products)
+            
+            # Generate random quantity
+            quantity = random.randint(self.min_order_quantity, self.max_order_quantity)
+            
+            # Create daily plan entry
+            plan = DailyPlan(
+                day=day + 1,
+                model=product.name,
+                quantity=quantity,
+                status="pending"
+            )
+            self.db.add(plan)
+            
+        self.db.commit()
+        self.log_event(
+            "plan_generated",
+            day,
+            f"Plan generado para el día {day + 1} con {num_orders} órdenes"
+        )
 
 
     def handle_arrivals(self, day: int):
@@ -87,8 +153,7 @@ class SimulationEngine:
         
         # First, complete production orders
         completed_orders = self.db.query(ProductionOrder).filter(
-            ProductionOrder.status == "in_progress",
-            ProductionOrder.expected_completion_date == day
+            ProductionOrder.status == "in_progress"
         ).all()
 
         for order in completed_orders:

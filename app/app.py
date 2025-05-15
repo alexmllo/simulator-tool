@@ -16,8 +16,8 @@ import_simulation_from_json("data/plan.json")
 
 import_providers_from_json("data/providers.json")
 import_initial_inventory_from_json("data/inventory_init.json")
-import_production_orders_from_json("data/production_orders.json")
-import_purchase_orders_from_json("data/purchase_orders.json")
+# import_production_orders_from_json("data/production_orders.json")
+# import_purchase_orders_from_json("data/purchase_orders.json")
 
 
 app = FastAPI(title="Simulador Producción 3D")

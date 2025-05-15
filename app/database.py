@@ -30,6 +30,12 @@ class BOM(Base):
     quantity = Column(Integer, nullable=False)
 
 
+class SimulationState(Base):
+    __tablename__ = "simulation_state"
+    id = Column(Integer, primary_key=True)
+    current_day = Column(Integer, default=1)
+
+
 class Inventory(Base):
     __tablename__ = "inventory"
     product_id = Column(Integer, ForeignKey("product.id"), primary_key=True)
