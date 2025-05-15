@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from '../../services/httpService';
+import {ProductionEvent} from '../../classes/models';
 
 @Component({
   selector: 'app-simulador',
@@ -9,8 +10,8 @@ import { HttpService } from '../../services/httpService';
 })
 export class SimuladorComponent implements OnInit {
   diaActual: number | null = null;
-  eventos: any[] = [];
-  eventosHistoricos: any[] = [];
+  eventos: ProductionEvent[] = [];
+  eventosHistoricos: ProductionEvent[] = [];
 
   constructor(private http: HttpService) {}
 

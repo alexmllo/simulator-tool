@@ -4,7 +4,7 @@ import {
   Product,
   InventoryItem,
   PurchaseOrder,
-  ProductionOrder, BOMItem
+  ProductionOrder, BOMItem, ProductionEvent
 } from '../classes/models';
 
 @Injectable({ providedIn: 'root' })
@@ -113,7 +113,7 @@ export class HttpService {
   });
 }
 
-public getTodosLosEventos(callback: (eventos: Event[]) => void) {
+public getTodosLosEventos(callback: (eventos: ProductionEvent[]) => void) {
   this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
     next: (resp) => callback(resp),
     error: () => alert('No se pudieron cargar los eventos históricos')

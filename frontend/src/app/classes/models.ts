@@ -98,7 +98,7 @@ export class ProductionOrder {
   }
 }
 
-export class Event {
+export class ProductionEvent {
   id?: number;
   type: string;
   sim_date: number;
