@@ -1,4 +1,3 @@
-from app.simulator import SimulationEngine
 from database import get_session, init_db
 from import_service import import_initial_inventory_from_json, import_production_orders_from_json, import_providers_from_json, import_purchase_orders_from_json, import_simulation_from_json
 from fastapi import FastAPI, Request
@@ -19,9 +18,6 @@ import_providers_from_json("data/providers.json")
 import_initial_inventory_from_json("data/inventory_init.json")
 import_production_orders_from_json("data/production_orders.json")
 import_purchase_orders_from_json("data/purchase_orders.json")
-
-db = get_session()
-engine = SimulationEngine(db)
 
 
 app = FastAPI(title="Simulador Producción 3D")

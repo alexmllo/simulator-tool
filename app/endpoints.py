@@ -1,6 +1,8 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from app.simulator import SimulationEngine
+from simulator import SimulationEngine
 from database import get_session, Product as DBProduct, Inventory as DBInventory, \
     ProductionOrder as DBProductionOrder, PurchaseOrder as DBPurchaseOrder, Supplier as DBSupplier, Event as DBEvent, DailyPlan as DBDailyPlan, BOM as DBBOM
 from model import Product, InventoryItem, ProductionOrder, PurchaseOrder, Supplier, Event, DailyPlan, BOMItem
@@ -10,7 +12,6 @@ from sqlalchemy.exc import IntegrityError
 router = APIRouter(prefix="/app", tags=["App"])
 
 db = get_session()
-engine = SimulationEngine(db)
 
 # --- Endpoints existentes simples ---
 
@@ -159,16 +160,17 @@ class SimulationResponse(BaseModel):
     events: List[EventResponse]
     error: Optional[str] = None
 
-@router.post("/api/simulator/run", response_model=SimulationResponse)
-async def run_simulation():
+@router.post("/simulator/run", response_model=SimulationResponse)
+def run_simulation(session: Session = Depends(get_session)):
     """
     Run one day of simulation and return the events that occurred.
     """
     try:
+        engine = SimulationEngine(session)
         engine.run_one_day()
         
         # Get events for the day that was just simulated
-        events = db.query(Event).filter_by(sim_date=engine.current_day - 1).all()
+        events = session.query(DBEvent).filter_by(sim_date=engine.current_day - 1).all()
         events_data = [
             EventResponse(
                 type=event.type,
@@ -184,4 +186,5 @@ async def run_simulation():
             events=events_data
         )
     except Exception as e:
+        session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
