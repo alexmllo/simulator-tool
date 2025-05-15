@@ -1,0 +1,81 @@
+<div class="productos-container">
+  <h2>Gestión de productos</h2>
+
+  <!-- Materia prima -->
+  <section class="subseccion">
+    <h3>Materia prima</h3>
+
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let mp of materiasPrimas">
+          <td>{{ mp.id }}</td>
+          <td>{{ mp.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <form (ngSubmit)="crearMateriaPrima()" class="formulario">
+      <label>Nombre de la nueva materia prima:</label>
+      <input [(ngModel)]="nuevaMateriaPrima.name" name="nombreMP" required>
+      <button type="submit">Añadir</button>
+    </form>
+  </section>
+
+  <!-- Productos finales -->
+  <section class="subseccion">
+    <h3>Productos finales</h3>
+
+    <div *ngFor="let pf of productosFinales" class="producto-final">
+      <h4>{{ pf.name }}</h4>
+
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Materia prima</th>
+            <th>Cantidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of bom[pf.id]">
+            <td>
+              {{ getNombreMateriaPrima(item.material_id) }}
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="item.quantity" name="q_{{pf.id}}_{{item.material_id}}" />
+            </td>
+            <td>
+              <button (click)="quitarMaterial(pf.id, item.material_id)">❌</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <form (ngSubmit)="anadirMaterial(pf.id)" *ngIf="nuevoMaterial[pf.id]">
+        <label>Materia prima:</label>
+        <select [(ngModel)]="nuevoMaterial[pf.id].material_id" name="mat_{{pf.id}}">
+          <option *ngFor="let mp of materiasPrimas" [value]="mp.id">{{ mp.name }}</option>
+        </select>
+
+        <label>Cantidad:</label>
+        <input type="number" [(ngModel)]="nuevoMaterial[pf.id].quantity" name="qty_{{pf.id}}" required min="1">
+
+        <button type="submit">Añadir material</button>
+      </form>
+    </div>
+
+    <hr>
+
+    <form (ngSubmit)="crearProductoFinal()" class="formulario">
+      <label>Nombre del nuevo producto final:</label>
+      <input [(ngModel)]="nuevoProductoFinal.name" name="nuevoPF" required>
+      <button type="submit">Crear producto final</button>
+    </form>
+  </section>
+</div>
