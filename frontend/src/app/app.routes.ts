@@ -5,14 +5,20 @@ import {PanelInventarioComponent} from './components/panel-inventario/panel-inve
 import {PanelPedidosComponent} from './components/panel-pedidos/panel-pedidos.component';
 import {PanelProduccionComponent} from './components/panel-produccion/panel-produccion.component';
 import {PanelProductosComponent} from './components/panel-productos/panel-productos.component';
+import {SimuladorComponent} from './components/simulador/simulador.component';
 
 export const routes: Routes = [
-  {path:'', component:MainComponentComponent,
-  children: [
-     {path:'compras', component: PanelComprasComponent},
-     {path:'inventario', component: PanelInventarioComponent},
-     {path:'pedidos', component: PanelPedidosComponent},
-     {path:'produccion', component: PanelProduccionComponent},
-     {path:'productos', component: PanelProductosComponent},
-  ]},
+  {
+    path: '',
+    component: MainComponentComponent,
+    children: [
+      { path: '', redirectTo: 'simulador', pathMatch: 'full' },
+      { path: 'simulador', component: SimuladorComponent },
+      { path: 'compras', component: PanelComprasComponent },
+      { path: 'inventario', component: PanelInventarioComponent },
+      { path: 'pedidos', component: PanelPedidosComponent },
+      { path: 'produccion', component: PanelProduccionComponent },
+      { path: 'productos', component: PanelProductosComponent },
+    ]
+  }
 ];

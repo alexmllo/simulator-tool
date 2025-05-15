@@ -3,13 +3,13 @@
   <table class="tabla">
     <thead>
       <tr>
-        <th>ID de producto</th>
+        <th>Producto</th>
         <th>Cantidad disponible</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of inventario">
-        <td>{{ item.product_id }}</td>
+        <td>{{ getNombreProducto(item.product_id) }}</td>
         <td>{{ item.quantity }}</td>
       </tr>
     </tbody>

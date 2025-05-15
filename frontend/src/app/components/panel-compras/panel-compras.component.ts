@@ -12,6 +12,8 @@ export class PanelComprasComponent {
 
   ordenesCompra: PurchaseOrder[] = [];
   productosRaw: Product[] = [];
+  productosMap: Map<number, string> = new Map();
+
 
   constructor(private http: HttpService) {
     this.http.getOrdenesCompra((ordenes: PurchaseOrder[]) => {
@@ -20,7 +22,13 @@ export class PanelComprasComponent {
 
     this.http.getProductos((productos) => {
       this.productosRaw = productos.filter(p => p.type === 'raw');
+      productos.forEach(p => this.productosMap.set(p.id, p.name));
     });
+  }
+
+
+   getNombreProducto(id: number): string {
+    return this.productosMap.get(id) || `#${id}`;
   }
 
   nuevaCompra = new PurchaseOrder({

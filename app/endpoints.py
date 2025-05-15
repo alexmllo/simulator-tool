@@ -1,22 +1,18 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from simulator import SimulationEngine
 from database import get_session, Product as DBProduct, Inventory as DBInventory, \
     ProductionOrder as DBProductionOrder, PurchaseOrder as DBPurchaseOrder, Supplier as DBSupplier, Event as DBEvent, DailyPlan as DBDailyPlan, BOM as DBBOM
-from model import Product, InventoryItem, ProductionOrder, PurchaseOrder, Supplier, Event, DailyPlan, BOMItem
+from model import Product, InventoryItem, ProductionOrder, PurchaseOrder, Supplier, Event, DailyPlan, BOMItem, \
+    SimulationResponse
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/app", tags=["App"])
 
-# --- Endpoints existentes simples ---
-
-@router.get("/day")
-def get_sim_day():
-    return {"day": 1}
-
-@router.post("/advance-day")
-def advance_day():
-    return {"status": "OK", "message": "Día avanzado"}
+db = get_session()
 
 # --- Endpoints de lectura con acceso a base de datos ---
 
@@ -35,7 +31,8 @@ def get_production_orders(session: Session = Depends(get_session)):
     orders = session.query(DBProductionOrder).all()
     return [ProductionOrder(
         id=o.id, creation_date=o.creation_date,
-        product_id=o.product_id, quantity=o.quantity, status=o.status
+        product_id=o.product_id, quantity=o.quantity, status=o.status,
+        expected_completion_date=o.expected_completion_date
     ) for o in orders]
 
 @router.get("/purchases/orders/", response_model=list[PurchaseOrder])
@@ -141,3 +138,61 @@ def delete_bom_item(product_id: int, material_id: int, session: Session = Depend
     ).delete()
     session.commit()
     return {"status": "ok"}
+
+@router.get("/simulator/events/all", response_model=List[Event])
+def get_all_events(session: Session = Depends(get_session)):
+    """
+    Return all simulation events stored in the database.
+    """
+    try:
+        events = session.query(DBEvent).order_by(DBEvent.sim_date).all()
+        return [
+            Event(
+                id=event.id,
+                type=event.type,
+                sim_date=event.sim_date,
+                detail=event.detail
+            )
+            for event in events
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+_engine = None
+
+def get_engine(session: Session) -> SimulationEngine:
+    global _engine
+    if _engine is None:
+        _engine = SimulationEngine(session)
+    return _engine
+
+@router.post("/simulator/run", response_model=SimulationResponse)
+def run_simulation(session: Session = Depends(get_session)):
+    """
+    Run one day of simulation and return the events that occurred.
+    """
+    try:
+        engine = get_engine(session)
+        engine.run_one_day()
+        
+        # Get events for the day that was just simulated
+        events = session.query(DBEvent).filter_by(sim_date=engine.current_day - 1).all()
+        events_data = [
+            Event(
+                id=event.id,
+                type=event.type,
+                sim_date=event.sim_date,
+                detail=event.detail
+            )
+            for event in events
+        ]
+        
+        return SimulationResponse(
+            success=True,
+            day=engine.current_day - 1,
+            events=events_data
+        )
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

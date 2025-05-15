@@ -1,0 +1,13 @@
+{
+    "orders": [
+        {
+            "id": 1,
+            "supplier": "ElectroComponents",
+            "product": "pcb_ref_CTRL_V2",
+            "quantity": 10,
+            "issue_date": 1,
+            "expected_delivery_date": 4,
+            "status": "pending"
+        }
+    ]
+}

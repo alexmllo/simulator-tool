@@ -4,7 +4,7 @@ import {
   Product,
   InventoryItem,
   PurchaseOrder,
-  ProductionOrder, BOMItem
+  ProductionOrder, BOMItem, ProductionEvent
 } from '../classes/models';
 
 @Injectable({ providedIn: 'root' })
@@ -104,6 +104,22 @@ export class HttpService {
       error: () => alert('No se pudo eliminar el material')
     });
   }
+
+
+  public avanzarSimulacion(callback: (response: any) => void) {
+  this.http.post(`${this.serverUrl}/app/simulator/run`, {}).subscribe({
+    next: (resp: any) => callback(resp),
+    error: () => alert('Error al avanzar la simulación')
+  });
+}
+
+public getTodosLosEventos(callback: (eventos: ProductionEvent[]) => void) {
+  this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
+    next: (resp) => callback(resp),
+    error: () => alert('No se pudieron cargar los eventos históricos')
+  });
+}
+
 
 
 }

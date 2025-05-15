@@ -7,6 +7,7 @@ import {PanelInventarioComponent} from './components/panel-inventario/panel-inve
 import {HttpService} from './services/httpService';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {SimuladorComponent} from './components/simulador/simulador.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import {FormsModule} from '@angular/forms';
     PanelProductosComponent,
     PanelPedidosComponent,
     PanelInventarioComponent,
+    SimuladorComponent
   ],
   exports: [
   ],

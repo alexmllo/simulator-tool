@@ -2,8 +2,6 @@ from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Date, ForeignKey, Table, Text
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql import func
 import os
 
 Base = declarative_base()
@@ -32,11 +30,17 @@ class BOM(Base):
     quantity = Column(Integer, nullable=False)
 
 
+class SimulationState(Base):
+    __tablename__ = "simulation_state"
+    id = Column(Integer, primary_key=True)
+    current_day = Column(Integer, default=1)
+
+
 class Inventory(Base):
     __tablename__ = "inventory"
     product_id = Column(Integer, ForeignKey("product.id"), primary_key=True)
     quantity = Column(Integer, default=0)
-
+    max_capacity = Column(Integer, default=1000)
     product = relationship("Product", back_populates="inventory_items")
 
 
@@ -54,19 +58,21 @@ class PurchaseOrder(Base):
     id = Column(Integer, primary_key=True, index=True)
     supplier_id = Column(Integer, ForeignKey("supplier.id"))
     product_id = Column(Integer, ForeignKey("product.id"))
+    plan_id = Column(Integer, ForeignKey("daily_plan.id"))  # Link to the plan this purchase is for
     quantity = Column(Integer)
-    issue_date = Column(Date)
-    expected_delivery_date = Column(Date)
+    issue_date = Column(Integer)
+    expected_delivery_date = Column(Integer)
     status = Column(String)  # pending, delivered, cancelled
 
 
 class ProductionOrder(Base):
     __tablename__ = "production_order"
     id = Column(Integer, primary_key=True, index=True)
-    creation_date = Column(Date)
+    creation_date = Column(Integer)
     product_id = Column(Integer, ForeignKey("product.id"))
     quantity = Column(Integer)
     status = Column(String)  # pending, in_progress, completed, cancelled
+    expected_completion_date = Column(Integer)
 
 
 class Event(Base):
@@ -83,6 +89,7 @@ class DailyPlan(Base):
     day = Column(Integer)
     model = Column(String)
     quantity = Column(Integer)
+    status = Column(String, default="pending")  # pending, fulfilled, cancelled
 
 
 # --- INICIALIZACIÓN ---
