@@ -106,4 +106,12 @@ export class HttpService {
   }
 
 
+  public avanzarSimulacion(callback: (response: any) => void) {
+  this.http.post(`${this.serverUrl}/app/simulator/run`, {}).subscribe({
+    next: (resp: any) => callback(resp),
+    error: () => alert('Error al avanzar la simulación')
+  });
+}
+
+
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {ProductionOrder} from '../../classes/models';
+import {Product, ProductionOrder} from '../../classes/models';
 import {HttpService} from '../../services/httpService';
 
 @Component({
@@ -10,10 +10,21 @@ import {HttpService} from '../../services/httpService';
 })
 export class PanelPedidosComponent {
   pedidosProduccion: ProductionOrder[] = [];
+  productosMap: Map<number, string> = new Map();
 
   constructor(private http: HttpService) {
     this.http.getPedidosProduccion((pedidos: ProductionOrder[]) => {
       this.pedidosProduccion = pedidos;
     });
+
+
+    this.http.getProductos((productos: Product[]) => {
+      productos.forEach(p => this.productosMap.set(p.id, p.name));
+    });
+  }
+
+
+   getNombreProducto(id: number): string {
+    return this.productosMap.get(id) || `#${id}`;
   }
 }

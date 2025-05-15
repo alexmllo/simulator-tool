@@ -13,16 +13,6 @@ router = APIRouter(prefix="/app", tags=["App"])
 
 db = get_session()
 
-# --- Endpoints existentes simples ---
-
-@router.get("/day")
-def get_sim_day():
-    return {"day": 1}
-
-@router.post("/advance-day")
-def advance_day():
-    return {"status": "OK", "message": "Día avanzado"}
-
 # --- Endpoints de lectura con acceso a base de datos ---
 
 @router.get("/inventory/", response_model=list[InventoryItem])
@@ -40,7 +30,8 @@ def get_production_orders(session: Session = Depends(get_session)):
     orders = session.query(DBProductionOrder).all()
     return [ProductionOrder(
         id=o.id, creation_date=o.creation_date,
-        product_id=o.product_id, quantity=o.quantity, status=o.status
+        product_id=o.product_id, quantity=o.quantity, status=o.status,
+        expected_completion_date=o.expected_completion_date
     ) for o in orders]
 
 @router.get("/purchases/orders/", response_model=list[PurchaseOrder])
@@ -146,7 +137,6 @@ def delete_bom_item(product_id: int, material_id: int, session: Session = Depend
     ).delete()
     session.commit()
     return {"status": "ok"}
-
 
 
 class EventResponse(BaseModel):

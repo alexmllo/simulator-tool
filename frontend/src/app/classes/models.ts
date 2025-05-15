@@ -65,8 +65,8 @@ export class PurchaseOrder {
   supplier_id: number;
   product_id: number;
   quantity: number;
-  issue_date: string; // formato ISO
-  expected_delivery_date: string; // formato ISO
+  issue_date: number; // formato ISO
+  expected_delivery_date: number; // formato ISO
   status: string;
 
   constructor(data: any) {
@@ -82,10 +82,11 @@ export class PurchaseOrder {
 
 export class ProductionOrder {
   id?: number;
-  creation_date: string; // formato ISO
+  creation_date: number; // formato ISO
   product_id: number;
   quantity: number;
   status: string;
+  expected_completion_date: number
 
   constructor(data: any) {
     this.id = data.id;
@@ -93,6 +94,7 @@ export class ProductionOrder {
     this.product_id = data.product_id;
     this.quantity = data.quantity;
     this.status = data.status;
+    this.expected_completion_date = data.expected_completion_date
   }
 }
 
