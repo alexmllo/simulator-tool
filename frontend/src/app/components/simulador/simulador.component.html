@@ -1,0 +1,24 @@
+<div class="simulador-container">
+  <h2>Simulador</h2>
+  <button (click)="avanzarDia()">Avanzar un día</button>
+
+  <div *ngIf="diaActual !== null">
+    <h3>Eventos del día {{ diaActual }}</h3>
+    <ul>
+      <li *ngFor="let evento of eventos">
+        <strong>{{ evento.type }}</strong> — {{ evento.detail }}
+      </li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <div>
+    <h3>Historial de eventos</h3>
+    <ul>
+      <li *ngFor="let evento of eventosHistoricos">
+        <strong>Día {{ evento.sim_date }}</strong> — {{ evento.type }}: {{ evento.detail }}
+      </li>
+    </ul>
+  </div>
+</div>

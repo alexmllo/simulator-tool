@@ -87,3 +87,11 @@ class SimulationConfig(BaseModel):
     capacity_per_day: int
     models: dict[str, ModelBOM]
     plan: List[DailyPlan]
+
+
+
+class SimulationResponse(BaseModel):
+    success: bool
+    day: int
+    events: List[Event]
+    error: Optional[str] = None

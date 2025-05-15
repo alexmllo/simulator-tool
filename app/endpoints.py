@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from simulator import SimulationEngine
 from database import get_session, Product as DBProduct, Inventory as DBInventory, \
     ProductionOrder as DBProductionOrder, PurchaseOrder as DBPurchaseOrder, Supplier as DBSupplier, Event as DBEvent, DailyPlan as DBDailyPlan, BOM as DBBOM
-from model import Product, InventoryItem, ProductionOrder, PurchaseOrder, Supplier, Event, DailyPlan, BOMItem
+from model import Product, InventoryItem, ProductionOrder, PurchaseOrder, Supplier, Event, DailyPlan, BOMItem, \
+    SimulationResponse
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
@@ -138,17 +139,25 @@ def delete_bom_item(product_id: int, material_id: int, session: Session = Depend
     session.commit()
     return {"status": "ok"}
 
+@router.get("/simulator/events/all", response_model=List[Event])
+def get_all_events(session: Session = Depends(get_session)):
+    """
+    Return all simulation events stored in the database.
+    """
+    try:
+        events = session.query(DBEvent).order_by(DBEvent.sim_date).all()
+        return [
+            Event(
+                id=event.id,
+                type=event.type,
+                sim_date=event.sim_date,
+                detail=event.detail
+            )
+            for event in events
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-class EventResponse(BaseModel):
-    type: str
-    sim_date: int
-    detail: str
-
-class SimulationResponse(BaseModel):
-    success: bool
-    day: int
-    events: List[EventResponse]
-    error: Optional[str] = None
 
 _engine = None
 
@@ -170,7 +179,8 @@ def run_simulation(session: Session = Depends(get_session)):
         # Get events for the day that was just simulated
         events = session.query(DBEvent).filter_by(sim_date=engine.current_day - 1).all()
         events_data = [
-            EventResponse(
+            Event(
+                id=event.id,
                 type=event.type,
                 sim_date=event.sim_date,
                 detail=event.detail

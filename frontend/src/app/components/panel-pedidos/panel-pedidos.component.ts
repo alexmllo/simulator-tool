@@ -23,7 +23,6 @@ export class PanelPedidosComponent {
     });
   }
 
-
    getNombreProducto(id: number): string {
     return this.productosMap.get(id) || `#${id}`;
   }

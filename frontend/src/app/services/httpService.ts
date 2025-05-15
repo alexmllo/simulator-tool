@@ -113,5 +113,13 @@ export class HttpService {
   });
 }
 
+public getTodosLosEventos(callback: (eventos: Event[]) => void) {
+  this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
+    next: (resp) => callback(resp),
+    error: () => alert('No se pudieron cargar los eventos históricos')
+  });
+}
+
+
 
 }

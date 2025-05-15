@@ -13,7 +13,7 @@
     <tbody>
       <tr *ngFor="let pedido of ordenesProduccion">
         <td>{{ pedido.id }}</td>
-        <td>{{ pedido.creation_date | date }}</td>
+        <td>{{ pedido.creation_date }}</td>
         <td>{{ getNombreProducto(pedido.product_id) }}</td>
         <td>{{ pedido.quantity }}</td>
         <td>{{ pedido.status }}</td>
