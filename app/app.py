@@ -1,21 +1,20 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
-from database import Event, get_session, init_db
-from import_service import (
-    import_simulation_from_json, 
-    import_providers_from_json, 
-    import_initial_inventory_from_json,
-    import_production_orders_from_json,
-    import_purchase_orders_from_json
-)
-from simulator import SimulationEngine
+from app.simulator import SimulationEngine
+from database import get_session, init_db
+from import_service import import_initial_inventory_from_json, import_production_orders_from_json, import_providers_from_json, import_purchase_orders_from_json, import_simulation_from_json
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+import endpoints
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Supply Chain Simulator API")
 
 # Initialize database and import initial data
 init_db()
 import_simulation_from_json("data/plan.json")
+
 import_providers_from_json("data/providers.json")
 import_initial_inventory_from_json("data/inventory_init.json")
 import_production_orders_from_json("data/production_orders.json")
@@ -24,46 +23,35 @@ import_purchase_orders_from_json("data/purchase_orders.json")
 db = get_session()
 engine = SimulationEngine(db)
 
-# Pydantic models
-class EventResponse(BaseModel):
-    type: str
-    sim_date: int
-    detail: str
 
-class SimulationResponse(BaseModel):
-    success: bool
-    day: int
-    events: List[EventResponse]
-    error: Optional[str] = None
+app = FastAPI(title="Simulador Producción 3D")
+origins = [
+    "*"
+]
 
-@app.post("/api/simulator/run", response_model=SimulationResponse)
-async def run_simulation():
-    """
-    Run one day of simulation and return the events that occurred.
-    """
-    try:
-        engine.run_one_day()
-        
-        # Get events for the day that was just simulated
-        events = db.query(Event).filter_by(sim_date=engine.current_day - 1).all()
-        events_data = [
-            EventResponse(
-                type=event.type,
-                sim_date=event.sim_date,
-                detail=event.detail
-            )
-            for event in events
-        ]
-        
-        return SimulationResponse(
-            success=True,
-            day=engine.current_day - 1,
-            events=events_data
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # permite solo los orígenes indicados
+    allow_credentials=True,
+    allow_methods=["*"],     # permite todos los métodos: GET, POST, etc.
+    allow_headers=["*"],     # permite todos los headers
+)
+
+# Montar rutas de los endpoints
+app.include_router(endpoints.router)
+
+# Servir archivos estáticos
+frontend_path = Path(__file__).resolve().parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+# Página principal
+@app.get("/", response_class=HTMLResponse)
+def serve_index():
+    index_file = frontend_path / "index.html"
+    if not index_file.exists():
+        return HTMLResponse("<h1>index.html no encontrado</h1>", status_code=404)
+    return FileResponse(index_file)
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+    uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=True)

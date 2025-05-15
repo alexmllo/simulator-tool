@@ -1,0 +1,23 @@
+<div class="tabla-container">
+  <h2>Pedidos de producción</h2>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Fecha de creación</th>
+        <th>ID de producto</th>
+        <th>Cantidad</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pedido of ordenesProduccion">
+        <td>{{ pedido.id }}</td>
+        <td>{{ pedido.creation_date | date }}</td>
+        <td>{{ pedido.product_id }}</td>
+        <td>{{ pedido.quantity }}</td>
+        <td>{{ pedido.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,57 @@
+<div class="tabla-container">
+  <h2>Órdenes de compra</h2>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>ID de proveedor</th>
+        <th>ID de producto</th>
+        <th>Cantidad</th>
+        <th>Fecha emisión</th>
+        <th>Fecha entrega esperada</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let orden of ordenesCompra">
+        <td>{{ orden.id }}</td>
+        <td>{{ orden.supplier_id }}</td>
+        <td>{{ orden.product_id }}</td>
+        <td>{{ orden.quantity }}</td>
+        <td>{{ orden.issue_date | date }}</td>
+        <td>{{ orden.expected_delivery_date | date }}</td>
+        <td>{{ orden.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <form (ngSubmit)="submitCompra()" #formCompra="ngForm" class="formulario">
+  <h3>Añadir orden de compra</h3>
+
+  <label>Producto:</label>
+  <select required [(ngModel)]="nuevaCompra.product_id" name="product_id">
+    <option *ngFor="let producto of productosRaw" [value]="producto.id">
+      {{ producto.name }}
+    </option>
+  </select>
+
+  <label>Cantidad:</label>
+  <input type="number" required [(ngModel)]="nuevaCompra.quantity" name="quantity">
+
+  <label>Fecha emisión:</label>
+  <input type="date" required [(ngModel)]="nuevaCompra.issue_date" name="issue_date">
+
+  <label>Fecha entrega esperada:</label>
+  <input type="date" required [(ngModel)]="nuevaCompra.expected_delivery_date" name="expected_delivery_date">
+
+  <label>Estado:</label>
+  <select required [(ngModel)]="nuevaCompra.status" name="status">
+    <option value="pending">Pendiente</option>
+    <option value="delivered">Entregado</option>
+    <option value="cancelled">Cancelado</option>
+  </select>
+
+  <button type="submit">Guardar</button>
+</form>
+
+</div>
