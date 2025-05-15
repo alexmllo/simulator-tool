@@ -1,0 +1,17 @@
+<div class="tabla-container">
+  <h2>Inventario actual</h2>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>ID de producto</th>
+        <th>Cantidad disponible</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of inventario">
+        <td>{{ item.product_id }}</td>
+        <td>{{ item.quantity }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
