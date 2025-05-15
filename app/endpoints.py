@@ -160,13 +160,21 @@ class SimulationResponse(BaseModel):
     events: List[EventResponse]
     error: Optional[str] = None
 
+_engine = None
+
+def get_engine(session: Session) -> SimulationEngine:
+    global _engine
+    if _engine is None:
+        _engine = SimulationEngine(session)
+    return _engine
+
 @router.post("/simulator/run", response_model=SimulationResponse)
 def run_simulation(session: Session = Depends(get_session)):
     """
     Run one day of simulation and return the events that occurred.
     """
     try:
-        engine = SimulationEngine(session)
+        engine = get_engine(session)
         engine.run_one_day()
         
         # Get events for the day that was just simulated
