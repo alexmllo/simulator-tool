@@ -1,0 +1,12 @@
+{
+    "orders": [
+        {
+            "id": 1,
+            "creation_date": 1,
+            "product": "P3D-Classic",
+            "quantity": 5,
+            "status": "pending",
+            "expected_completion_date": 2
+        }
+    ]
+}

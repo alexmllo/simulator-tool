@@ -27,6 +27,7 @@ class SimulationEngine:
 
         self.log_event("end_day", day, f"Fin del día {day}")
 
+
     def handle_arrivals(self, day: int):
         """Process deliveries from previous day's purchases"""
         yield self.env.timeout(0)
@@ -38,86 +39,105 @@ class SimulationEngine:
         ).all()
 
         for order in deliveries:
-            order.status = "delivered"
             inventory = self.db.query(Inventory).filter_by(product_id=order.product_id).first()
-            if inventory:
-                inventory.quantity += order.quantity
-            else:
-                self.db.add(Inventory(product_id=order.product_id, quantity=order.quantity))
             
-            self.log_event(
-                "purchase_arrival",
-                day,
-                f"Llegada de {order.quantity} unidades de producto ID {order.product_id} (OC #{order.id})"
-            )
+            # Check if adding the order quantity would exceed max capacity
+            if inventory:
+                if inventory.quantity + order.quantity > inventory.max_capacity:
+                    # Reschedule the order for the next day
+                    order.expected_delivery_date = day + 1
+                    self.log_event(
+                        "purchase_rescheduled",
+                        day,
+                        f"Pedido de compra #{order.id} reprogramado para el día {day + 1} - Capacidad máxima alcanzada"
+                    )
+                else:
+                    inventory.quantity += order.quantity
+                    order.status = "delivered"
+                    self.log_event(
+                        "purchase_arrival",
+                        day,
+                        f"Llegada de {order.quantity} unidades de {inventory.product.name} (OC #{order.id})"
+                    )
+            else:
+                # For new inventory items, check if initial quantity exceeds max capacity
+                if order.quantity > 1000:  # Default max capacity
+                    # Reschedule the order for the next day
+                    order.expected_delivery_date = day + 1
+                    self.log_event(
+                        "purchase_rescheduled",
+                        day,
+                        f"Pedido de compra #{order.id} reprogramado para el día {day + 1} - Capacidad máxima alcanzada"
+                    )
+                else:
+                    self.db.add(Inventory(product_id=order.product_id, quantity=order.quantity))
+                    order.status = "delivered"
+                    self.log_event(
+                        "purchase_arrival",
+                        day,
+                        f"Llegada de {order.quantity} unidades (OC #{order.id})"
+                    )
+            
+            self.db.commit()
 
-        self.db.commit()
 
     def execute_production(self, day: int):
-        """Execute production orders for today and complete orders from previous day"""
+        """Execute production orders for today and complete orders"""
         yield self.env.timeout(0)
         
-        # First, complete production orders from previous day
+        # First, complete production orders
         completed_orders = self.db.query(ProductionOrder).filter(
             ProductionOrder.status == "in_progress",
             ProductionOrder.expected_completion_date == day
         ).all()
 
         for order in completed_orders:
-            order.status = "completed"
             product = self.db.query(Product).filter_by(id=order.product_id).first()
             
             # Add finished product to inventory
             inventory = self.db.query(Inventory).filter_by(product_id=order.product_id).first()
             if inventory:
-                inventory.quantity += order.quantity
+                if inventory.quantity + order.quantity > inventory.max_capacity:
+                    # Reschedule the production completion for the next day
+                    order.expected_completion_date = day + 1
+                    self.log_event(
+                        "production_rescheduled",
+                        day,
+                        f"Producción de {order.quantity} unidades de {product.name} reprogramada para el día {day + 1} - Capacidad máxima alcanzada"
+                    )
+                else:
+                    inventory.quantity += order.quantity
+                    order.status = "completed"
+                    self.log_event(
+                        "production_completed",
+                        day,
+                        f"Producción completada: {order.quantity} unidades de {product.name}"
+                    )
             else:
+                # For new inventory items
                 self.db.add(Inventory(product_id=order.product_id, quantity=order.quantity))
-            
-            self.log_event(
-                "production_completed",
-                day,
-                f"Producción completada: {order.quantity} unidades de {product.name}"
-            )
+                order.status = "completed"
+                self.log_event(
+                    "production_completed",
+                    day,
+                    f"Producción completada: {order.quantity} unidades de {product.name}"
+                )
 
-        # Then, start new production orders for today
+        # Then, start new production orders
         pending_orders = self.db.query(ProductionOrder).filter(
             ProductionOrder.status == "pending",
-            ProductionOrder.expected_completion_date == day + 1  # Orders started today complete tomorrow
         ).all()
 
         for order in pending_orders:
-            # Check if we have all required materials
-            bom_items = self.db.query(BOM).filter_by(finished_product_id=order.product_id).all()
-            has_materials = True
-            
-            for bom in bom_items:
-                stock = self.db.query(Inventory).filter_by(product_id=bom.material_id).first()
-                required_qty = bom.quantity * order.quantity
-                if not stock or stock.quantity < required_qty:
-                    has_materials = False
-                    self.log_event(
-                        "error",
-                        day,
-                        f"Falta de materiales para producir {order.quantity} unidades del producto {order.product_id}"
-                    )
-                    break
-
-            if has_materials:
-                # Consume materials
-                for bom in bom_items:
-                    stock = self.db.query(Inventory).filter_by(product_id=bom.material_id).first()
-                    stock.quantity -= bom.quantity * order.quantity
-
-                # Mark order as in progress
-                order.status = "in_progress"
-                self.log_event(
-                    "production_started",
-                    day,
-                    f"Iniciada producción de {order.quantity} unidades del producto {order.product_id}"
-                )
+            order.status = "in_progress"
+            self.log_event(
+                "production_started",
+                day,
+                f"Iniciada producción de {order.quantity} unidades del producto {order.product_id}"
+            )
 
         self.db.commit()
+
 
     def log_event(self, type_: str, sim_date: int, detail: str):
         try:

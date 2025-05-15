@@ -34,7 +34,7 @@ class Inventory(Base):
     __tablename__ = "inventory"
     product_id = Column(Integer, ForeignKey("product.id"), primary_key=True)
     quantity = Column(Integer, default=0)
-
+    max_capacity = Column(Integer, default=1000)
     product = relationship("Product", back_populates="inventory_items")
 
 

@@ -1,6 +1,6 @@
 import json
 from model import SimulationConfig
-from database import get_session, Product, BOM, DailyPlan, Supplier, Inventory
+from database import get_session, Product, BOM, DailyPlan, Supplier, Inventory, ProductionOrder, PurchaseOrder
 from sqlalchemy.orm import Session
 
 def import_simulation_from_json(json_path: str):
@@ -135,5 +135,74 @@ def import_initial_inventory_from_json(json_path: str):
         print("✅ Inventario inicial importado correctamente")
     except Exception as e:
         print(f"❌ Error al importar inventario inicial: {e}")
+        db.rollback()
+        raise
+
+def import_production_orders_from_json(json_path: str):
+    """Import production orders from production_orders.json"""
+    with open(json_path, "r") as f:
+        data = json.load(f)
+
+    db: Session = get_session()
+    print("Importando órdenes de producción...")
+
+    try:
+        for order_data in data["orders"]:
+            # Get the product
+            product = db.query(Product).filter_by(name=order_data["product"]).first()
+            if not product:
+                raise Exception(f"Producto no encontrado: {order_data['product']}")
+
+            # Create production order
+            production_order = ProductionOrder(
+                creation_date=order_data["creation_date"],
+                product_id=product.id,
+                quantity=order_data["quantity"],
+                status=order_data["status"],
+                expected_completion_date=order_data["expected_completion_date"]
+            )
+            db.add(production_order)
+
+        db.commit()
+        print("✅ Órdenes de producción importadas correctamente")
+    except Exception as e:
+        print(f"❌ Error al importar órdenes de producción: {e}")
+        db.rollback()
+        raise
+
+def import_purchase_orders_from_json(json_path: str):
+    """Import purchase orders from purchase_orders.json"""
+    with open(json_path, "r") as f:
+        data = json.load(f)
+
+    db: Session = get_session()
+    print("Importando órdenes de compra...")
+
+    try:
+        for order_data in data["orders"]:
+            # Get the supplier and product
+            supplier = db.query(Supplier).filter_by(name=order_data["supplier"]).first()
+            product = db.query(Product).filter_by(name=order_data["product"]).first()
+            
+            if not supplier:
+                raise Exception(f"Proveedor no encontrado: {order_data['supplier']}")
+            if not product:
+                raise Exception(f"Producto no encontrado: {order_data['product']}")
+
+            # Create purchase order
+            purchase_order = PurchaseOrder(
+                supplier_id=supplier.id,
+                product_id=product.id,
+                quantity=order_data["quantity"],
+                issue_date=order_data["issue_date"],
+                expected_delivery_date=order_data["expected_delivery_date"],
+                status=order_data["status"]
+            )
+            db.add(purchase_order)
+
+        db.commit()
+        print("✅ Órdenes de compra importadas correctamente")
+    except Exception as e:
+        print(f"❌ Error al importar órdenes de compra: {e}")
         db.rollback()
         raise

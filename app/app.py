@@ -2,7 +2,13 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 from database import Event, get_session, init_db
-from import_service import import_initial_inventory_from_json, import_providers_from_json, import_simulation_from_json
+from import_service import (
+    import_simulation_from_json, 
+    import_providers_from_json, 
+    import_initial_inventory_from_json,
+    import_production_orders_from_json,
+    import_purchase_orders_from_json
+)
 from simulator import SimulationEngine
 
 app = FastAPI(title="Supply Chain Simulator API")
@@ -12,6 +18,11 @@ init_db()
 import_simulation_from_json("data/plan.json")
 import_providers_from_json("data/providers.json")
 import_initial_inventory_from_json("data/inventory_init.json")
+import_production_orders_from_json("data/production_orders.json")
+import_purchase_orders_from_json("data/purchase_orders.json")
+
+db = get_session()
+engine = SimulationEngine(db)
 
 # Pydantic models
 class EventResponse(BaseModel):
@@ -31,8 +42,6 @@ async def run_simulation():
     Run one day of simulation and return the events that occurred.
     """
     try:
-        db = get_session()
-        engine = SimulationEngine(db)
         engine.run_one_day()
         
         # Get events for the day that was just simulated
