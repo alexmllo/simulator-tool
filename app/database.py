@@ -92,13 +92,6 @@ class DailyPlan(Base):
     status = Column(String, default="pending")  # pending, fulfilled, cancelled
 
 
-# --- INICIALIZACIÓN ---
-
-def init_db():
-    if not os.path.exists(DB_PATH):
-        print("Inicializando base de datos...")
-    Base.metadata.create_all(bind=engine)
-
 def get_session():
     return SessionLocal()
 
