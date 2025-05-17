@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {Product, ProductionOrder} from '../../classes/models';
+import {Product, DailyPlan, DailyOrder} from '../../classes/models';
 import {HttpService} from '../../services/httpService';
 
 @Component({
@@ -9,28 +9,31 @@ import {HttpService} from '../../services/httpService';
   styleUrl: './panel-pedidos.component.css'
 })
 export class PanelPedidosComponent {
-  pedidosProduccion: ProductionOrder[] = [];
-  productosMap: Map<number, string> = new Map();
+  pedidosProduccion: DailyPlan[] = [];
+  productosMap: Map<string, string> = new Map();
 
   constructor(private http: HttpService) {
-    this.http.getPedidosProduccion((pedidos: ProductionOrder[]) => {
-      this.pedidosProduccion = pedidos.filter((x)=>{return x.status == "pending"});
+    this.http.getPedidos((pedidos: DailyPlan[]) => {
+      this.pedidosProduccion = pedidos;
     });
 
-
     this.http.getProductos((productos: Product[]) => {
-      productos.forEach(p => this.productosMap.set(p.id, p.name));
+      productos.forEach(p => this.productosMap.set(p.name, p.name));
     });
   }
 
-   getNombreProducto(id: number): string {
-    return this.productosMap.get(id) || `#${id}`;
+  getNombreProducto(model: string): string {
+    return this.productosMap.get(model) || model;
   }
 
   mandarAProduccion(pedidoId: number) {
-  this.http.iniciarProduccion(pedidoId, () => {
-      this.pedidosProduccion = this.pedidosProduccion.filter(x=>x.id != pedidoId);
-  });
-}
-
+    this.http.iniciarProduccion(pedidoId, () => {
+      const pedido = this.pedidosProduccion.find(x => x.id === pedidoId);
+      if (pedido) {
+        pedido.orders.forEach(order => {
+          order.status = 'in_production';
+        });
+      }
+    });
+  }
 }

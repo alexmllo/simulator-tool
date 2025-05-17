@@ -151,44 +151,30 @@ class SimulationEngine:
         """Execute production orders for today and complete orders"""
         yield self.env.timeout(0)
         
-        # First, complete production orders
-        completed_orders = self.db.query(ProductionOrder).filter(
+        # First, complete production orders in progress
+        production_orders = self.db.query(ProductionOrder).filter(
             ProductionOrder.status == "in_progress"
         ).all()
 
-        for order in completed_orders:
+        for order in production_orders:
             product = self.db.query(Product).filter_by(id=order.product_id).first()
             
-            # Add finished product to inventory
-            inventory = self.db.query(Inventory).filter_by(product_id=order.product_id).first()
-            if inventory:
-                if inventory.quantity + order.quantity > inventory.max_capacity:
-                    # Reschedule the production completion for the next day
-                    order.expected_completion_date = day + 1
-                    self.log_event(
-                        "production_rescheduled",
-                        day,
-                        f"Producción de {order.quantity} unidades de {product.name} reprogramada para el día {day + 1} - Capacidad máxima alcanzada"
-                    )
-                else:
-                    inventory.quantity += order.quantity
-                    order.status = "completed"
-                    self.log_event(
-                        "production_completed",
-                        day,
-                        f"Producción completada: {order.quantity} unidades de {product.name}"
-                    )
-            else:
-                # For new inventory items
-                self.db.add(Inventory(product_id=order.product_id, quantity=order.quantity))
-                order.status = "completed"
-                self.log_event(
-                    "production_completed",
-                    day,
-                    f"Producción completada: {order.quantity} unidades de {product.name}"
-                )
+            order.status = "completed"
+            # Find and update the corresponding daily plan
+            daily_plan = self.db.query(DailyPlan).filter(
+                DailyPlan.model == product.name,
+                DailyPlan.quantity == order.quantity,
+                DailyPlan.status == "in_production"
+            ).first()
+            if daily_plan:
+                daily_plan.status = "fulfilled"
+            self.log_event(
+                "production_completed",
+                day,
+                f"Producción completada: {order.quantity} unidades de {product.name}"
+            )
 
-        # Then, start new production orders
+        # Then, start new production orders in pending
         pending_orders = self.db.query(ProductionOrder).filter(
             ProductionOrder.status == "pending",
         ).all()

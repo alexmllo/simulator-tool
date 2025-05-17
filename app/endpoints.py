@@ -2,6 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from production import add_to_production
 from simulator import SimulationEngine
 from database import get_session, Product as DBProduct, Inventory as DBInventory, \
     ProductionOrder as DBProductionOrder, PurchaseOrder as DBPurchaseOrder, Supplier as DBSupplier, Event as DBEvent, DailyPlan as DBDailyPlan, BOM as DBBOM
@@ -59,7 +60,15 @@ def get_suppliers(session: Session = Depends(get_session)):
 @router.get("/plan/", response_model=list[DailyPlan])
 def get_plan(session: Session = Depends(get_session)):
     plans = session.query(DBDailyPlan).all()
-    return [DailyPlan(day=p.day, orders=[{"model": p.model, "quantity": p.quantity}]) for p in plans]
+    return [DailyPlan(
+        id=p.id,
+        day=p.day,
+        orders=[{
+            "model": p.model,
+            "quantity": p.quantity,
+            "status": p.status
+        }]
+    ) for p in plans]
 
 @router.get("/events/", response_model=list[Event])
 def get_events(session: Session = Depends(get_session)):
@@ -201,11 +210,8 @@ def run_simulation(session: Session = Depends(get_session)):
 @router.post("/production/start/{order_id}")
 def start_production(order_id: int, session: Session = Depends(get_session)):
     try:
-        ##implementar logica para producir.
-        ## que la función devuelva un resultado, en forma de string, ok si todo fue bien
-        ## o un mensaje indicando lo que fallo si no se pudo completar
-        result = "ok"
-        return {"result": result}
+        message = add_to_production(order_id, session)
+        return {"result": message}
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))

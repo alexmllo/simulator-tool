@@ -9,6 +9,12 @@ def import_simulation_from_json(json_path: str):
     with open(json_path, "r") as f:
         raw_data = json.load(f)
 
+    # Add required fields to the plan data
+    for plan in raw_data["plan"]:
+        plan["id"] = 0  # The database will assign the real ID
+        for order in plan["orders"]:
+            order["status"] = "pending"  # Set initial status
+
     # 2. Validar con Pydantic
     config = SimulationConfig(**raw_data)
 
@@ -85,7 +91,8 @@ def import_simulation_from_json(json_path: str):
             db.add(DailyPlan(
                 day=plan.day,
                 model=order.model,
-                quantity=order.quantity
+                quantity=order.quantity,
+                status=order.status  # Add status when creating DailyPlan
             ))
 
     db.commit()

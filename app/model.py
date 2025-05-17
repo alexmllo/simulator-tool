@@ -76,9 +76,11 @@ class ModelBOM(BaseModel):
 class DailyOrder(BaseModel):
     model: str
     quantity: int
+    status: str
 
 
 class DailyPlan(BaseModel):
+    id: int
     day: int
     orders: List[DailyOrder]
 
