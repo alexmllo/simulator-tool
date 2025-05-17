@@ -4,7 +4,7 @@ import {
   Product,
   InventoryItem,
   PurchaseOrder,
-  ProductionOrder, BOMItem, ProductionEvent
+  ProductionOrder, BOMItem, ProductionEvent, DailyPlan
 } from '../classes/models';
 
 @Injectable({ providedIn: 'root' })
@@ -56,6 +56,15 @@ export class HttpService {
     });
   }
 
+  public getPedidos(callback: (pedidos: DailyPlan[]) => void) {
+    this.http.get<any[]>(`${this.serverUrl}/app/plan/`).subscribe({
+      next: (response) => {
+        const pedidos = response.map((p) => new DailyPlan(p));
+        callback(pedidos);
+      },
+      error: () => alert('No se pudieron obtener los datos de pedidos')
+    });
+  }
 
   public crearProducto(nuevo: Product, callback: (creado: Product) => void) {
     const payload = {

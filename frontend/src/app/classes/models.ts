@@ -115,18 +115,22 @@ export class ProductionEvent {
 export class DailyOrder {
   model: string;
   quantity: number;
+  status: string;
 
   constructor(data: any) {
     this.model = data.model;
     this.quantity = data.quantity;
+    this.status = data.status;
   }
 }
 
 export class DailyPlan {
+  id: number;
   day: number;
   orders: DailyOrder[];
 
   constructor(data: any) {
+    this.id = data.id;
     this.day = data.day;
     this.orders = (data.orders || []).map((item: any) => new DailyOrder(item));
   }

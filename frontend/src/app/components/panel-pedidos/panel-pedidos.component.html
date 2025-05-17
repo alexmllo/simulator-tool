@@ -4,23 +4,27 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Fecha de creación</th>
-        <th>Producto</th>
+        <th>Día</th>
+        <th>Modelo</th>
         <th>Cantidad</th>
+        <th>Estado</th>
         <th>Mandar a producción</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let pedido of pedidosProduccion">
         <td>{{ pedido.id }}</td>
-        <td>{{ pedido.creation_date}}</td>
-        <td>{{ getNombreProducto(pedido.product_id) }}</td>
-        <td>{{ pedido.quantity }}</td>
-        <td>
-          <button (click)="mandarAProduccion(pedido.id)" [disabled]="pedido.status !== 'pending'">
-            Mandar
-          </button>
-        </td>
+        <td>{{ pedido.day }}</td>
+        <ng-container *ngFor="let order of pedido.orders">
+          <td>{{ getNombreProducto(order.model) }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>{{ order.status }}</td>
+          <td>
+            <button *ngIf="order.status === 'pending'" (click)="mandarAProduccion(pedido.id)">
+              Mandar
+            </button>
+          </td>
+        </ng-container>
       </tr>
     </tbody>
   </table>
