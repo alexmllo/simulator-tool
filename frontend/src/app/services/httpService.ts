@@ -59,13 +59,13 @@ export class HttpService {
 
   public crearProducto(nuevo: Product, callback: (creado: Product) => void) {
     const payload = {
-      id:0,
+      id: 0,
       name: nuevo.name,
       type: nuevo.type
     };
 
     this.http.post(`${this.serverUrl}/app/products`, payload, {
-      headers: { 'Content-Type': 'application/json' }
+      headers: {'Content-Type': 'application/json'}
     }).subscribe({
       next: (resp: any) => callback(new Product(resp)),
       error: (err) => {
@@ -107,19 +107,32 @@ export class HttpService {
 
 
   public avanzarSimulacion(callback: (response: any) => void) {
-  this.http.post(`${this.serverUrl}/app/simulator/run`, {}).subscribe({
-    next: (resp: any) => callback(resp),
-    error: () => alert('Error al avanzar la simulación')
-  });
-}
+    this.http.post(`${this.serverUrl}/app/simulator/run`, {}).subscribe({
+      next: (resp: any) => callback(resp),
+      error: () => alert('Error al avanzar la simulación')
+    });
+  }
 
-public getTodosLosEventos(callback: (eventos: ProductionEvent[]) => void) {
-  this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
-    next: (resp) => callback(resp),
-    error: () => alert('No se pudieron cargar los eventos históricos')
-  });
-}
+  public getTodosLosEventos(callback: (eventos: ProductionEvent[]) => void) {
+    this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
+      next: (resp) => callback(resp),
+      error: () => alert('No se pudieron cargar los eventos históricos')
+    });
+  }
 
+  public iniciarProduccion(orderId: number, callback: () => void) {
+    this.http.post(`${this.serverUrl}/app/production/start/${orderId}`, {}).subscribe({
+      next: (resp:any) => {
+        if(resp.result == "ok"){
+          callback()
+          alert('Pedido enviado a producción')
+        } else {
+          alert(resp.result)
+        }
+      },
+      error: () => alert('No se pudo iniciar la producción')
+    });
+  }
 
 
 }

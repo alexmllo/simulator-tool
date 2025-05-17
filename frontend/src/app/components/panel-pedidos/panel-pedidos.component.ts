@@ -14,7 +14,7 @@ export class PanelPedidosComponent {
 
   constructor(private http: HttpService) {
     this.http.getPedidosProduccion((pedidos: ProductionOrder[]) => {
-      this.pedidosProduccion = pedidos;
+      this.pedidosProduccion = pedidos.filter((x)=>{return x.status == "pending"});
     });
 
 
@@ -26,4 +26,11 @@ export class PanelPedidosComponent {
    getNombreProducto(id: number): string {
     return this.productosMap.get(id) || `#${id}`;
   }
+
+  mandarAProduccion(pedidoId: number) {
+  this.http.iniciarProduccion(pedidoId, () => {
+      this.pedidosProduccion = this.pedidosProduccion.filter(x=>x.id != pedidoId);
+  });
+}
+
 }

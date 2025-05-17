@@ -196,3 +196,16 @@ def run_simulation(session: Session = Depends(get_session)):
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/production/start/{order_id}")
+def start_production(order_id: int, session: Session = Depends(get_session)):
+    try:
+        ##implementar logica para producir.
+        ## que la función devuelva un resultado, en forma de string, ok si todo fue bien
+        ## o un mensaje indicando lo que fallo si no se pudo completar
+        result = "ok"
+        return {"result": result}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

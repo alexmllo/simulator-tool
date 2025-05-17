@@ -7,7 +7,7 @@
         <th>Fecha de creación</th>
         <th>Producto</th>
         <th>Cantidad</th>
-        <th>Estado</th>
+        <th>Mandar a producción</th>
       </tr>
     </thead>
     <tbody>
@@ -16,7 +16,11 @@
         <td>{{ pedido.creation_date}}</td>
         <td>{{ getNombreProducto(pedido.product_id) }}</td>
         <td>{{ pedido.quantity }}</td>
-        <td>{{ pedido.status }}</td>
+        <td>
+          <button (click)="mandarAProduccion(pedido.id)" [disabled]="pedido.status !== 'pending'">
+            Mandar
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>

@@ -81,7 +81,7 @@ export class PurchaseOrder {
 }
 
 export class ProductionOrder {
-  id?: number;
+  id: number;
   creation_date: number; // formato ISO
   product_id: number;
   quantity: number;
