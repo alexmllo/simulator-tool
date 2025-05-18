@@ -45,7 +45,7 @@ export class InventoryItem {
 }
 
 export class Supplier {
-  id?: number;
+  id: number;
   name: string;
   product_id: number;
   unit_cost: number;
@@ -65,8 +65,8 @@ export class PurchaseOrder {
   supplier_id: number;
   product_id: number;
   quantity: number;
-  issue_date: number; // formato ISO
-  expected_delivery_date: number; // formato ISO
+  issue_date: Date;
+  expected_delivery_date: Date;
   status: string;
 
   constructor(data: any) {
@@ -74,41 +74,87 @@ export class PurchaseOrder {
     this.supplier_id = data.supplier_id;
     this.product_id = data.product_id;
     this.quantity = data.quantity;
-    this.issue_date = data.issue_date;
-    this.expected_delivery_date = data.expected_delivery_date;
+    this.issue_date = new Date(data.issue_date);
+    this.expected_delivery_date = new Date(data.expected_delivery_date);
     this.status = data.status;
+  }
+
+  get formattedIssueDate(): string {
+    return this.formatDate(this.issue_date);
+  }
+
+  get formattedDeliveryDate(): string {
+    return this.formatDate(this.expected_delivery_date);
+  }
+
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }
 
 export class ProductionOrder {
   id: number;
-  creation_date: number; // formato ISO
+  creation_date: Date;
   product_id: number;
   quantity: number;
   status: string;
-  expected_completion_date: number
+  expected_completion_date: Date;
+  daily_plan_id: number;
 
   constructor(data: any) {
     this.id = data.id;
-    this.creation_date = data.creation_date;
+    this.creation_date = new Date(data.creation_date);
     this.product_id = data.product_id;
     this.quantity = data.quantity;
     this.status = data.status;
-    this.expected_completion_date = data.expected_completion_date
+    this.expected_completion_date = new Date(data.expected_completion_date);
+    this.daily_plan_id = data.daily_plan_id;
+  }
+
+  get formattedCreationDate(): string {
+    return this.formatDate(this.creation_date);
+  }
+
+  get formattedCompletionDate(): string {
+    return this.formatDate(this.expected_completion_date);
+  }
+
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }
 
 export class ProductionEvent {
   id?: number;
   type: string;
-  sim_date: number;
+  sim_date: Date;
   detail: string;
 
   constructor(data: any) {
     this.id = data.id;
     this.type = data.type;
-    this.sim_date = data.sim_date;
+    this.sim_date = new Date(data.sim_date);
     this.detail = data.detail;
+  }
+
+  get formattedDate(): string {
+    return this.formatDate(this.sim_date);
+  }
+
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }
 
@@ -126,13 +172,25 @@ export class DailyOrder {
 
 export class DailyPlan {
   id: number;
-  day: number;
+  day: Date;
   orders: DailyOrder[];
 
   constructor(data: any) {
     this.id = data.id;
-    this.day = data.day;
+    this.day = new Date(data.day);
     this.orders = (data.orders || []).map((item: any) => new DailyOrder(item));
+  }
+
+  get formattedDay(): string {
+    return this.formatDate(this.day);
+  }
+
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }
 

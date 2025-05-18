@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from database import DailyPlan, Product, BOM, Inventory, ProductionOrder
 
@@ -37,11 +38,12 @@ def add_to_production(order_id: int, session: Session):
 
         # Create production order
         production_order = ProductionOrder(
-            creation_date=order.day,
+            creation_date=datetime.now(),
             product_id=product.id,
             quantity=order.quantity,
             status="pending",
-            expected_completion_date=order.day + 1  # Assuming 1 day production time
+            expected_completion_date=datetime.now() + timedelta(days=1),  # Assuming 1 day production time
+            daily_plan_id=order_id  # Add this line to link with the daily plan
         )
         session.add(production_order)
         

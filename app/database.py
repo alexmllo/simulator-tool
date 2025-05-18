@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Date, ForeignKey, Table, Text
 )
@@ -33,7 +34,7 @@ class BOM(Base):
 class SimulationState(Base):
     __tablename__ = "simulation_state"
     id = Column(Integer, primary_key=True)
-    current_day = Column(Integer, default=1)
+    current_day = Column(Date, default=datetime.now())
 
 
 class Inventory(Base):
@@ -60,33 +61,34 @@ class PurchaseOrder(Base):
     product_id = Column(Integer, ForeignKey("product.id"))
     plan_id = Column(Integer, ForeignKey("daily_plan.id"))  # Link to the plan this purchase is for
     quantity = Column(Integer)
-    issue_date = Column(Integer)
-    expected_delivery_date = Column(Integer)
+    issue_date = Column(Date)
+    expected_delivery_date = Column(Date)
     status = Column(String)  # pending, delivered, cancelled
 
 
 class ProductionOrder(Base):
     __tablename__ = "production_order"
     id = Column(Integer, primary_key=True, index=True)
-    creation_date = Column(Integer)
+    creation_date = Column(Date)
     product_id = Column(Integer, ForeignKey("product.id"))
     quantity = Column(Integer)
     status = Column(String)  # pending, in_progress, completed, cancelled
-    expected_completion_date = Column(Integer)
+    expected_completion_date = Column(Date)
+    daily_plan_id = Column(Integer, ForeignKey("daily_plan.id"))
 
 
 class Event(Base):
     __tablename__ = "event"
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String)
-    sim_date = Column(Integer)
+    sim_date = Column(Date)
     detail = Column(Text)
 
 
 class DailyPlan(Base):
     __tablename__ = "daily_plan"
     id = Column(Integer, primary_key=True, index=True)
-    day = Column(Integer)
+    day = Column(Date)
     model = Column(String)
     quantity = Column(Integer)
     status = Column(String, default="pending")  # pending, fulfilled, cancelled

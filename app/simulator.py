@@ -1,3 +1,4 @@
+from datetime import date, datetime, timedelta
 import simpy 
 import random
 from database import Inventory, DailyPlan, Product, ProductionOrder, PurchaseOrder, Event, BOM, Supplier, SimulationState
@@ -14,10 +15,10 @@ class SimulationEngine:
             self.current_day = state.current_day
         else:
             # Initialize if not exists
-            state = SimulationState(current_day=1)
+            state = SimulationState(current_day=datetime.now().date())
             self.db.add(state)
             self.db.commit()
-            self.current_day = 1
+            self.current_day = datetime.now().date()
         
         self.capacity_per_day = 10
         self.min_daily_orders = 1  # Minimum number of orders per day
@@ -29,16 +30,17 @@ class SimulationEngine:
         print(f"🕒 Ejecutando día {self.current_day}...")
         self.env.process(self.process_day(self.current_day))
         self.env.run()
-        self.current_day += 1
+        self.current_day = (self.current_day + timedelta(days=1))
         
         # Save current day to database
         state = self.db.query(SimulationState).first()
         state.current_day = self.current_day
         self.db.commit()
 
-    def process_day(self, day: int):
+    def process_day(self, day: datetime):
         yield self.env.timeout(0)
-        self.log_event("start_day", day, f"Inicio del día {day}")
+        formatted_day = day.strftime("%d/%m/%Y")
+        self.log_event("start_day", day, f"Inicio del día {formatted_day}")
 
         # First handle arrivals from previous day's production and purchases
         yield self.env.process(self.handle_arrivals(day))
@@ -49,14 +51,17 @@ class SimulationEngine:
         # Then execute production orders for today
         yield self.env.process(self.execute_production(day))
 
-        self.log_event("end_day", day, f"Fin del día {day}")
+        self.log_event("end_day", day, f"Fin del día {formatted_day}")
 
-    def check_and_generate_plan(self, day: int):
+    def check_and_generate_plan(self, day: datetime):
         """Check if we need to generate a new plan for the next day"""
         yield self.env.timeout(0)
         
+        tomorrow : date = (day + timedelta(days=1))
         # Check if we have a plan for tomorrow
-        tomorrow_plan = self.db.query(DailyPlan).filter(DailyPlan.day == day + 1).first()
+        tomorrow_plan = self.db.query(DailyPlan).filter(
+            DailyPlan.day == tomorrow
+        ).first()
         if tomorrow_plan:
             return
             
@@ -79,7 +84,7 @@ class SimulationEngine:
             
             # Create daily plan entry
             plan = DailyPlan(
-                day=day + 1,
+                day=tomorrow,
                 model=product.name,
                 quantity=quantity,
                 status="pending"
@@ -90,11 +95,11 @@ class SimulationEngine:
         self.log_event(
             "plan_generated",
             day,
-            f"Plan generado para el día {day + 1} con {num_orders} órdenes"
+            f"Plan generado para el día {day + timedelta(days=1)} con {num_orders} órdenes"
         )
 
 
-    def handle_arrivals(self, day: int):
+    def handle_arrivals(self, day: datetime):
         """Process deliveries from previous day's purchases"""
         yield self.env.timeout(0)
         
@@ -111,11 +116,11 @@ class SimulationEngine:
             if inventory:
                 if inventory.quantity + order.quantity > inventory.max_capacity:
                     # Reschedule the order for the next day
-                    order.expected_delivery_date = day + 1
+                    order.expected_delivery_date = day + timedelta(days=1)
                     self.log_event(
                         "purchase_rescheduled",
                         day,
-                        f"Pedido de compra #{order.id} reprogramado para el día {day + 1} - Capacidad máxima alcanzada"
+                        f"Pedido de compra #{order.id} reprogramado para el día {day + timedelta(days=1)} - Capacidad máxima alcanzada"
                     )
                 else:
                     inventory.quantity += order.quantity
@@ -129,11 +134,11 @@ class SimulationEngine:
                 # For new inventory items, check if initial quantity exceeds max capacity
                 if order.quantity > 1000:  # Default max capacity
                     # Reschedule the order for the next day
-                    order.expected_delivery_date = day + 1
+                    order.expected_delivery_date = day + timedelta(days=1)
                     self.log_event(
                         "purchase_rescheduled",
                         day,
-                        f"Pedido de compra #{order.id} reprogramado para el día {day + 1} - Capacidad máxima alcanzada"
+                        f"Pedido de compra #{order.id} reprogramado para el día {day + timedelta(days=1)} - Capacidad máxima alcanzada"
                     )
                 else:
                     self.db.add(Inventory(product_id=order.product_id, quantity=order.quantity))
@@ -147,7 +152,7 @@ class SimulationEngine:
             self.db.commit()
 
 
-    def execute_production(self, day: int):
+    def execute_production(self, day: datetime):
         """Execute production orders for today and complete orders"""
         yield self.env.timeout(0)
         
@@ -160,19 +165,21 @@ class SimulationEngine:
             product = self.db.query(Product).filter_by(id=order.product_id).first()
             
             order.status = "completed"
-            # Find and update the corresponding daily plan
-            daily_plan = self.db.query(DailyPlan).filter(
-                DailyPlan.model == product.name,
-                DailyPlan.quantity == order.quantity,
-                DailyPlan.status == "in_production"
-            ).first()
-            if daily_plan:
-                daily_plan.status = "fulfilled"
+            # Find and update the corresponding daily plan using the direct relationship
+            daily_plan = self.db.query(DailyPlan).filter_by(id=order.daily_plan_id).first()
             self.log_event(
                 "production_completed",
                 day,
                 f"Producción completada: {order.quantity} unidades de {product.name}"
             )
+            
+            if daily_plan:
+                daily_plan.status = "fulfilled"
+                self.log_event(
+                    "order_fulfilled",
+                    day,
+                    f"Pedido #{order.id} completado: {order.quantity} unidades de {product.name}"
+                )
 
         # Then, start new production orders in pending
         pending_orders = self.db.query(ProductionOrder).filter(
@@ -190,13 +197,16 @@ class SimulationEngine:
         self.db.commit()
 
 
-    def log_event(self, type_: str, sim_date: int, detail: str):
+    def log_event(self, type_: str, sim_date: datetime, detail: str):
         try:
+            formatted_date = sim_date.strftime("%d/%m/%Y")
             # Replace all product IDs with names in the detail
             if "producto" in detail:
                 # Extract the product ID if it exists
                 if "ID" in detail:
                     product_id = int(detail.split("ID ")[1].split()[0])
+                elif "día" in detail:
+                    detail = detail.replace(str(sim_date), formatted_date)
                 else:
                     # Handle cases where ID is just a number
                     words = detail.split()

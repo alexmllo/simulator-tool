@@ -3,14 +3,19 @@ from model import SimulationConfig
 from database import get_session, Product, BOM, DailyPlan, Supplier, Inventory, ProductionOrder, PurchaseOrder
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from datetime import date, timedelta, datetime
 
 def import_simulation_from_json(json_path: str):
     # 1. Leer el archivo
     with open(json_path, "r") as f:
         raw_data = json.load(f)
 
-    # Add required fields to the plan data
+    # Convert dates from dd/mm/yyyy to yyyy-mm-dd format
     for plan in raw_data["plan"]:
+        # Convert the day string to a date object
+        day_str = plan["day"]
+        day_obj = datetime.strptime(day_str, "%d/%m/%Y").date()
+        plan["day"] = day_obj.isoformat()  # Convert to ISO format string
         plan["id"] = 0  # The database will assign the real ID
         for order in plan["orders"]:
             order["status"] = "pending"  # Set initial status
@@ -190,13 +195,17 @@ def import_production_orders_from_json(json_path: str):
             if not product:
                 raise Exception(f"Producto no encontrado: {order_data['product']}")
 
+            # Convert dd/mm/yyyy strings to date objects
+            creation_date = datetime.strptime(order_data["creation_date"], "%d/%m/%Y").date()
+            expected_completion_date = datetime.strptime(order_data["expected_completion_date"], "%d/%m/%Y").date()
+
             # Create production order
             production_order = ProductionOrder(
-                creation_date=order_data["creation_date"],
+                creation_date=creation_date,
                 product_id=product.id,
                 quantity=order_data["quantity"],
                 status=order_data["status"],
-                expected_completion_date=order_data["expected_completion_date"]
+                expected_completion_date=expected_completion_date
             )
             db.add(production_order)
 

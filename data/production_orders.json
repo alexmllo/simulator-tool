@@ -2,11 +2,11 @@
     "orders": [
         {
             "id": 1,
-            "creation_date": 1,
+            "creation_date": "18/05/2024",
             "product": "P3D-Classic",
             "quantity": 5,
             "status": "pending",
-            "expected_completion_date": 2
+            "expected_completion_date": "19/05/2024"
         }
     ]
 }
