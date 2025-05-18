@@ -1,7 +1,136 @@
 .simulador-container {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-button {
-  margin-bottom: 10px;
+.simulator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.current-day-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.day-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.day-value {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.advance-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.advance-button:hover {
+  background-color: #45a049;
+}
+
+.button-icon {
+  font-size: 1.2em;
+}
+
+.events-container {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.events-list {
+  margin-top: 15px;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.event-type {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 120px;
+}
+
+.event-detail {
+  color: #666;
+}
+
+.history-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.history-list {
+  margin-top: 15px;
+}
+
+.history-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.history-date {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.history-content {
+  display: flex;
+  gap: 15px;
+}
+
+.history-type {
+  font-weight: 600;
+  color: #4CAF50;
+  min-width: 120px;
+}
+
+.history-detail {
+  color: #666;
+}
+
+h2 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+h3 {
+  color: #34495e;
+  margin: 0 0 15px 0;
 }

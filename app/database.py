@@ -48,10 +48,9 @@ class Inventory(Base):
 class Supplier(Base):
     __tablename__ = "supplier"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    product_id = Column(Integer, ForeignKey("product.id"))
-    unit_cost = Column(Float)
-    lead_time_days = Column(Integer)
+    name = Column(String, nullable=False)
+    product_id = Column(Integer, ForeignKey("product.id"), nullable=False)
+    unit_cost = Column(Float, nullable=False)
 
 
 class PurchaseOrder(Base):

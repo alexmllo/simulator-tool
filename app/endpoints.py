@@ -52,11 +52,22 @@ def get_purchase_orders(session: Session = Depends(get_session)):
 def get_suppliers(session: Session = Depends(get_session)):
     suppliers = session.query(DBSupplier).all()
     return [Supplier(
-        id=s.id, name=s.name,
+        id=s.id,
+        name=s.name,
         product_id=s.product_id,
-        unit_cost=s.unit_cost,
-        lead_time_days=s.lead_time_days
+        unit_cost=s.unit_cost
     ) for s in suppliers]
+
+@router.get("/simulator/current-day")
+def get_current_day(session: Session = Depends(get_session)):
+    """
+    Get the current simulation day.
+    """
+    try:
+        engine = get_engine(session)
+        return {"current_day": engine.current_day}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/plan/", response_model=list[DailyPlan])
 def get_plan(session: Session = Depends(get_session)):

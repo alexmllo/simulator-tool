@@ -49,14 +49,12 @@ export class Supplier {
   name: string;
   product_id: number;
   unit_cost: number;
-  lead_time_days: number;
 
   constructor(data: any) {
     this.id = data.id;
     this.name = data.name;
     this.product_id = data.product_id;
     this.unit_cost = data.unit_cost;
-    this.lead_time_days = data.lead_time_days;
   }
 }
 

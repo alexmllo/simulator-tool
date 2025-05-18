@@ -1,24 +1,41 @@
 <div class="simulador-container">
-  <h2>Simulador</h2>
-  <button (click)="avanzarDia()">Avanzar un día</button>
-
-  <div *ngIf="diaActual !== null">
-    <h3>Eventos del día {{ formattedCurrentDay }}</h3>
-    <ul>
-      <li *ngFor="let evento of eventos">
-        <strong>{{ evento.type }}</strong> — {{ evento.detail }}
-      </li>
-    </ul>
+  <div class="simulator-header">
+    <h2>Simulador</h2>
+    <div class="current-day-display" *ngIf="formattedCurrentDay">
+      <div class="day-label">Día actual:</div>
+      <div class="day-value">{{ formattedCurrentDay }}</div>
+    </div>
+    <button class="advance-button" (click)="avanzarDia()">
+      <span class="button-icon">⏭️</span>
+      Avanzar un día
+    </button>
   </div>
 
-  <hr>
+  <div class="events-container" *ngIf="formattedCurrentDay">
+    <h3>Eventos del día {{ formattedCurrentDay }}</h3>
+    <div class="events-list">
+      <div class="event-item" *ngFor="let evento of eventos">
+        <span class="event-type">{{ evento.type }}</span>
+        <span class="event-detail">{{ evento.detail }}</span>
+      </div>
+      <div *ngIf="eventos.length === 0" class="no-events">No hay eventos para este día.</div>
+    </div>
+  </div>
 
-  <div>
+  <div class="history-container">
     <h3>Historial de eventos</h3>
-    <ul>
-      <li *ngFor="let evento of eventosHistoricos">
-        <strong>Día {{ evento.formattedDate }}</strong> — {{ evento.type }}: {{ evento.detail }}
-      </li>
-    </ul>
+    <div class="history-list">
+      <div class="day-group" *ngFor="let fecha of eventosAgrupados | keyvalue">
+        <div class="day-header">Día {{ fecha.key }}</div>
+        <div class="day-events">
+          <div class="history-item" *ngFor="let evento of fecha.value">
+            <div class="history-content">
+              <span class="history-type">{{ evento.type }}</span>
+              <span class="history-detail">{{ evento.detail }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

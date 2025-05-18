@@ -86,10 +86,18 @@ export class HttpService {
 
 
   public crearOrdenCompra(nueva: PurchaseOrder, callback: (creada: PurchaseOrder) => void) {
-    nueva.id = 0
-    this.http.post(`${this.serverUrl}/app/purchases/orders`, nueva).subscribe({
-      next: (resp: any) => callback(new PurchaseOrder(resp)),
-      error: () => alert('Error al crear la orden de compra')
+    nueva.id = 0;
+    this.http.post(`${this.serverUrl}/app/purchases/orders`, nueva, {
+      headers: {'Content-Type': 'application/json'}
+    }).subscribe({
+      next: (resp: any) => {
+        console.log('Server response:', resp);
+        callback(new PurchaseOrder(resp));
+      },
+      error: (error) => {
+        console.error('Error creating purchase order:', error);
+        alert('Error al crear la orden de compra: ' + (error.error?.detail || error.message));
+      }
     });
   }
 
@@ -143,5 +151,22 @@ export class HttpService {
     });
   }
 
+  public getSuppliers(callback: (providers: any[]) => void) {
+    this.http.get<any[]>(`${this.serverUrl}/app/suppliers/`).subscribe({
+      next: (response) => {
+        callback(response);
+      },
+      error: () => alert('No se pudieron obtener los datos de proveedores')
+    });
+  }
+
+  public getCurrentDay(callback: (response: any) => void) {
+    this.http.get<any>(`${this.serverUrl}/app/simulator/current-day`).subscribe({
+      next: (response) => {
+        callback(response);
+      },
+      error: () => alert('No se pudo obtener el día actual de la simulación')
+    });
+  }
 
 }
