@@ -4,7 +4,7 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>ID de proveedor</th>
+        <th>Proveedor</th>
         <th>Producto</th>
         <th>Cantidad</th>
         <th>Fecha emisión</th>
@@ -15,7 +15,7 @@
     <tbody>
       <tr *ngFor="let orden of ordenesCompra">
         <td>{{ orden.id }}</td>
-        <td>{{ orden.supplier_id }}</td>
+        <td>{{ getProviderName(orden.supplier_id) }}</td>
         <td>{{ getNombreProducto(orden.product_id) }}</td>
         <td>{{ orden.quantity }}</td>
         <td>{{ orden.formattedIssueDate }}</td>
@@ -27,6 +27,13 @@
 
   <form (ngSubmit)="submitCompra()" #formCompra="ngForm" class="formulario">
     <h3>Añadir orden de compra</h3>
+
+    <label>Proveedor:</label>
+    <select required [(ngModel)]="nuevaCompra.supplier_id" name="supplier_id">
+      <option *ngFor="let supplier of uniqueSuppliers" [value]="supplier.id">
+        {{ supplier.name }}
+      </option>
+    </select>
 
     <label>Producto:</label>
     <select required [(ngModel)]="nuevaCompra.product_id" name="product_id">

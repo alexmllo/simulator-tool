@@ -30,11 +30,10 @@ class InventoryItem(BaseModel):
 # --- Proveedores y compras ---
 
 class Supplier(BaseModel):
-    id: Optional[int]
+    id: int
     name: str
     product_id: int
     unit_cost: float
-    lead_time_days: int
 
 
 class PurchaseOrder(BaseModel):

@@ -112,15 +112,11 @@ def import_providers_from_json(json_path: str):
     print("Importando proveedores y materiales...")
 
     try:
+        # First, clear existing suppliers
+        db.query(Supplier).delete()
+        
         for provider_data in data["providers"]:
-            # Create or get supplier
-            supplier = Supplier(
-                name=provider_data["name"]
-            )
-            db.add(supplier)
-            db.flush()  # To get the supplier ID
-
-            # Process each material for this supplier
+            # Process each material for this provider
             for material_name, material_info in provider_data["materials"].items():
                 # Get or create the product
                 product = db.query(Product).filter_by(name=material_name).first()
@@ -129,14 +125,13 @@ def import_providers_from_json(json_path: str):
                     db.add(product)
                     db.flush()
 
-                # Create a new supplier entry for each material
-                material_supplier = Supplier(
+                # Create a supplier entry for this material
+                supplier = Supplier(
                     name=provider_data["name"],
                     product_id=product.id,
-                    unit_cost=material_info["unit_cost"],
-                    lead_time_days=material_info["lead_time_days"]
+                    unit_cost=material_info["unit_cost"]
                 )
-                db.add(material_supplier)
+                db.add(supplier)
 
         db.commit()
         print("✅ Proveedores importados correctamente")

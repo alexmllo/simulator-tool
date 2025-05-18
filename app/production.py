@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from database import DailyPlan, Product, BOM, Inventory, ProductionOrder
+from database import DailyPlan, Product, BOM, Inventory, ProductionOrder, SimulationState
 
 def add_to_production(order_id: int, session: Session):
     """
@@ -36,14 +36,18 @@ def add_to_production(order_id: int, session: Session):
         if missing_materials:
             return f"Missing materials: {', '.join(missing_materials)}"
 
+        # Get current simulation day
+        state = session.query(SimulationState).first()
+        current_day = state.current_day if state else datetime.now().date()
+
         # Create production order
         production_order = ProductionOrder(
-            creation_date=datetime.now(),
+            creation_date=current_day,
             product_id=product.id,
             quantity=order.quantity,
             status="pending",
-            expected_completion_date=datetime.now() + timedelta(days=1),  # Assuming 1 day production time
-            daily_plan_id=order_id  # Add this line to link with the daily plan
+            expected_completion_date=current_day + timedelta(days=1),
+            daily_plan_id=order_id
         )
         session.add(production_order)
         

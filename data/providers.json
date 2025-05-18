@@ -4,46 +4,86 @@
             "name": "ElectroComponents",
             "materials": {
                 "pcb_ref_CTRL_V2": {
-                    "unit_cost": 45.0,
-                    "lead_time_days": 3
+                    "unit_cost": 45.0
                 },
                 "pcb_ref_CTRL_V3": {
-                    "unit_cost": 55.0,
-                    "lead_time_days": 3
+                    "unit_cost": 55.0
                 },
                 "transformador_24v": {
-                    "unit_cost": 35.0,
-                    "lead_time_days": 2
+                    "unit_cost": 35.0
                 },
                 "enchufe_schuko": {
-                    "unit_cost": 8.0,
-                    "lead_time_days": 1
+                    "unit_cost": 8.0
+                },
+                "kit_piezas": {
+                    "unit_cost": 95.0
+                },
+                "extrusor": {
+                    "unit_cost": 78.0
+                },
+                "sensor_autonivel": {
+                    "unit_cost": 48.0
+                },
+                "cables_conexion": {
+                    "unit_cost": 15.0
                 }
             }
         },
         {
             "name": "MecanicaPrecision",
             "materials": {
+                "pcb_ref_CTRL_V2": {
+                    "unit_cost": 48.0
+                },
+                "pcb_ref_CTRL_V3": {
+                    "unit_cost": 58.0
+                },
+                "transformador_24v": {
+                    "unit_cost": 38.0
+                },
+                "enchufe_schuko": {
+                    "unit_cost": 9.0
+                },
                 "kit_piezas": {
-                    "unit_cost": 90.0,
-                    "lead_time_days": 4
+                    "unit_cost": 90.0
                 },
                 "extrusor": {
-                    "unit_cost": 75.0,
-                    "lead_time_days": 3
+                    "unit_cost": 75.0
                 },
                 "sensor_autonivel": {
-                    "unit_cost": 45.0,
-                    "lead_time_days": 2
+                    "unit_cost": 45.0
+                },
+                "cables_conexion": {
+                    "unit_cost": 13.0
                 }
             }
         },
         {
             "name": "CableTech",
             "materials": {
+                "pcb_ref_CTRL_V2": {
+                    "unit_cost": 42.0
+                },
+                "pcb_ref_CTRL_V3": {
+                    "unit_cost": 52.0
+                },
+                "transformador_24v": {
+                    "unit_cost": 32.0
+                },
+                "enchufe_schuko": {
+                    "unit_cost": 7.0
+                },
+                "kit_piezas": {
+                    "unit_cost": 92.0
+                },
+                "extrusor": {
+                    "unit_cost": 72.0
+                },
+                "sensor_autonivel": {
+                    "unit_cost": 42.0
+                },
                 "cables_conexion": {
-                    "unit_cost": 12.0,
-                    "lead_time_days": 1
+                    "unit_cost": 12.0
                 }
             }
         }
