@@ -1,48 +1,91 @@
-# 📦 Simulador de Producción – README
+# 🏭 Production Simulator
 
-Esta aplicación está compuesta por un backend en Python (FastAPI) y un frontend en Angular.
+A comprehensive production simulation and management system that helps businesses model, analyze, and optimize their production processes. This tool simulates daily production operations, inventory management, and order fulfillment in a controlled environment.
 
----
+## 🌟 Features
 
-## 🔧 Requisitos
+- **Daily Production Simulation**: Simulate production processes day by day
+- **Inventory Management**: Track and manage raw materials and finished products
+- **Order Management**: Handle production orders and purchase orders
+- **Real-time Event Tracking**: Monitor production events and system status
+- **Interactive Dashboard**: Visualize production metrics and system state
+- **Historical Analysis**: Review past production events and performance
 
-- Python 3.10 o superior  
-- Node.js 18 o superior  
-- npm  
-- Angular CLI (puedes instalarlo con "npm install -g @angular/cli")
+## 🏗️ Architecture
 
----
+The application is built with a modern tech stack:
 
-## 🚀 Backend (Python + FastAPI)
+- **Backend**: Python with FastAPI
+- **Frontend**: Angular 19
+- **Database**: SQLAlchemy ORM
+- **Simulation Engine**: SimPy for discrete event simulation
 
-1. Navega a la carpeta del backend:  
-   "cd app"
+## 🔧 Prerequisites
 
-2. Instala las dependencias:  
-   "pip install -r requirements.txt"
+- Python 3.10 or higher
+- Node.js 18 or higher
+- npm
+- Angular CLI (`npm install -g @angular/cli`)
 
-3. Ejecuta el fichero app.py
+## 🚀 Getting Started
 
-El backend estará disponible en: [http://localhost:8000](http://localhost:8000)
+### Backend Setup
 
----
+1. Navigate to the backend directory:
+   ```bash
+   cd app
+   ```
 
-## 💻 Frontend (Angular)
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. Navega a la carpeta del frontend:  
-   "cd frontend"
+3. Start the backend server:
+   ```bash
+   python app.py
+   ```
+   The backend will be available at: http://localhost:8000
 
-2. Instala las dependencias:  
-   "npm install"
+### Frontend Setup
 
-3. Inicia el servidor de desarrollo de Angular:  
-   "ng serve"
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
-La aplicación se abrirá en: [http://localhost:4200](http://localhost:4200)
+2. Install Node.js dependencies:
+   ```bash
+   npm install
+   ```
 
----
+3. Start the development server:
+   ```bash
+   ng serve
+   ```
+   The application will be available at: http://localhost:4200
 
-## ✅ Notas
+## 📊 Usage
 
-- Asegúrate de que el **backend esté en ejecución** antes de usar el frontend.
-- El frontend está configurado para comunicarse con el backend en "http://localhost:8000". Si cambias el puerto o el host, actualiza también la variable "serverUrl" en el servicio Angular.
+1. Access the application through your web browser at http://localhost:4200
+2. Use the simulator interface to:
+   - View the current simulation day
+   - Advance the simulation day by day
+   - Monitor production events
+   - Track inventory levels
+   - Manage production orders
+   - View historical data
+
+## ⚠️ Important Notes
+
+- Ensure the backend server is running before starting the frontend
+- The frontend is configured to communicate with the backend at http://localhost:8000
+- If you need to change the backend URL, update the `serverUrl` variable in the Angular service
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
