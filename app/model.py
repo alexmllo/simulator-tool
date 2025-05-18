@@ -42,8 +42,8 @@ class PurchaseOrder(BaseModel):
     supplier_id: int
     product_id: int
     quantity: int
-    issue_date: int
-    expected_delivery_date: int
+    issue_date: date
+    expected_delivery_date: date
     status: str  # "pending", "delivered", "cancelled"
 
 
@@ -51,11 +51,12 @@ class PurchaseOrder(BaseModel):
 
 class ProductionOrder(BaseModel):
     id: Optional[int]
-    creation_date: int
+    creation_date: date
     product_id: int
     quantity: int
     status: str  # "pending", "in_progress", "completed", "cancelled"
-    expected_completion_date: int
+    expected_completion_date: date
+    daily_plan_id: Optional[int]
 
 
 # --- Evento registrado durante la simulación ---
@@ -63,7 +64,7 @@ class ProductionOrder(BaseModel):
 class Event(BaseModel):
     id: Optional[int]
     type: str  # "production_start", etc.
-    sim_date: int
+    sim_date: date
     detail: str
 
 
@@ -81,7 +82,7 @@ class DailyOrder(BaseModel):
 
 class DailyPlan(BaseModel):
     id: int
-    day: int
+    day: date
     orders: List[DailyOrder]
 
 
@@ -94,6 +95,6 @@ class SimulationConfig(BaseModel):
 
 class SimulationResponse(BaseModel):
     success: bool
-    day: int
+    day: date
     events: List[Event]
     error: Optional[str] = None

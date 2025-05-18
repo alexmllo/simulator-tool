@@ -5,6 +5,7 @@
       <tr>
         <th>ID</th>
         <th>Fecha de creación</th>
+        <th>ID Pedido</th>
         <th>ID de producto</th>
         <th>Cantidad</th>
         <th>Estado</th>
@@ -13,7 +14,8 @@
     <tbody>
       <tr *ngFor="let pedido of ordenesProduccion">
         <td>{{ pedido.id }}</td>
-        <td>{{ pedido.creation_date }}</td>
+        <td>{{ pedido.formattedCreationDate }}</td>
+        <td>{{ pedido.daily_plan_id }}</td>
         <td>{{ getNombreProducto(pedido.product_id) }}</td>
         <td>{{ pedido.quantity }}</td>
         <td>{{ pedido.status }}</td>

@@ -14,7 +14,7 @@
     <tbody>
       <tr *ngFor="let pedido of pedidosProduccion">
         <td>{{ pedido.id }}</td>
-        <td>{{ pedido.day }}</td>
+        <td>{{ pedido.formattedDay }}</td>
         <ng-container *ngFor="let order of pedido.orders">
           <td>{{ getNombreProducto(order.model) }}</td>
           <td>{{ order.quantity }}</td>

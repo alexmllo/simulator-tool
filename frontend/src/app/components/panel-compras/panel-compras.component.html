@@ -18,40 +18,35 @@
         <td>{{ orden.supplier_id }}</td>
         <td>{{ getNombreProducto(orden.product_id) }}</td>
         <td>{{ orden.quantity }}</td>
-        <td>{{ orden.issue_date }}</td>
-        <td>{{ orden.expected_delivery_date }}</td>
+        <td>{{ orden.formattedIssueDate }}</td>
+        <td>{{ orden.formattedDeliveryDate }}</td>
         <td>{{ orden.status }}</td>
       </tr>
     </tbody>
   </table>
 
   <form (ngSubmit)="submitCompra()" #formCompra="ngForm" class="formulario">
-  <h3>Añadir orden de compra</h3>
+    <h3>Añadir orden de compra</h3>
 
-  <label>Producto:</label>
-  <select required [(ngModel)]="nuevaCompra.product_id" name="product_id">
-    <option *ngFor="let producto of productosRaw" [value]="producto.id">
-      {{ producto.name }}
-    </option>
-  </select>
+    <label>Producto:</label>
+    <select required [(ngModel)]="nuevaCompra.product_id" name="product_id">
+      <option *ngFor="let producto of productosRaw" [value]="producto.id">
+        {{ producto.name }}
+      </option>
+    </select>
 
-  <label>Cantidad:</label>
-  <input type="number" required [(ngModel)]="nuevaCompra.quantity" name="quantity">
+    <label>Cantidad:</label>
+    <input type="number" required [(ngModel)]="nuevaCompra.quantity" name="quantity">
 
-  <label>Fecha emisión:</label>
-  <input type="date" required [(ngModel)]="nuevaCompra.issue_date" name="issue_date">
+    <label>Fecha emisión:</label>
+    <input type="date" [value]="nuevaCompra.issue_date | date:'yyyy-MM-dd'" readonly>
 
-  <label>Fecha entrega esperada:</label>
-  <input type="date" required [(ngModel)]="nuevaCompra.expected_delivery_date" name="expected_delivery_date">
+    <label>Fecha entrega esperada:</label>
+    <input type="date" required [(ngModel)]="nuevaCompra.expected_delivery_date" name="expected_delivery_date">
 
-  <label>Estado:</label>
-  <select required [(ngModel)]="nuevaCompra.status" name="status">
-    <option value="pending">Pendiente</option>
-    <option value="delivered">Entregado</option>
-    <option value="cancelled">Cancelado</option>
-  </select>
+    <label>Estado:</label>
+    <input type="text" [value]="'Pendiente'" readonly>
 
-  <button type="submit">Guardar</button>
-</form>
-
+    <button type="submit">Guardar</button>
+  </form>
 </div>

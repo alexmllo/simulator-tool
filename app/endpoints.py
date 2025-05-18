@@ -33,7 +33,8 @@ def get_production_orders(session: Session = Depends(get_session)):
     return [ProductionOrder(
         id=o.id, creation_date=o.creation_date,
         product_id=o.product_id, quantity=o.quantity, status=o.status,
-        expected_completion_date=o.expected_completion_date
+        expected_completion_date=o.expected_completion_date,
+        daily_plan_id=o.daily_plan_id
     ) for o in orders]
 
 @router.get("/purchases/orders/", response_model=list[PurchaseOrder])
@@ -183,15 +184,16 @@ def run_simulation(session: Session = Depends(get_session)):
     """
     try:
         engine = get_engine(session)
+        previous_day = engine.current_day
         engine.run_one_day()
         
         # Get events for the day that was just simulated
-        events = session.query(DBEvent).filter_by(sim_date=engine.current_day - 1).all()
+        events = session.query(DBEvent).filter_by(sim_date=previous_day).all()
         events_data = [
             Event(
                 id=event.id,
                 type=event.type,
-                sim_date=event.sim_date,
+                sim_date=event.sim_date,  # Already a date object
                 detail=event.detail
             )
             for event in events
@@ -199,11 +201,12 @@ def run_simulation(session: Session = Depends(get_session)):
         
         return SimulationResponse(
             success=True,
-            day=engine.current_day - 1,
+            day=previous_day,  # Already a date object
             events=events_data
         )
     except Exception as e:
         session.rollback()
+        print(f"Error in run_simulation: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
