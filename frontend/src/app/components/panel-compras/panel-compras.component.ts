@@ -81,6 +81,10 @@ export class PanelComprasComponent implements OnInit {
       alert('La cantidad debe ser mayor que 0');
       return;
     }
+    else if (new Date(this.nuevaCompra.expected_delivery_date) <= this.currentDay) {
+      alert('La fecha de entrega debe ser posterior al día actual');
+      return;
+    }
   
     const orderToSubmit = new PurchaseOrder({
       ...this.nuevaCompra,
@@ -98,7 +102,7 @@ export class PanelComprasComponent implements OnInit {
         product_id: 0,
         quantity: 0,
         issue_date: this.currentDay,
-        expected_delivery_date: new Date(),
+        expected_delivery_date: new Date(this.currentDay.getTime() + 24*60*60*1000),
         status: 'pending'
       });
       alert('Orden de compra creada correctamente');

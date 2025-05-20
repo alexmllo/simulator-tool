@@ -178,7 +178,7 @@ class SimulationEngine:
                 self.log_event(
                     "order_fulfilled",
                     day,
-                    f"Pedido #{order.id} completado: {order.quantity} unidades de {product.name}"
+                    f"Pedido #{daily_plan.id} completado: {order.quantity} unidades de {product.name}"
                 )
 
         # Then, start new production orders in pending

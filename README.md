@@ -1,8 +1,24 @@
-# 🏭 Production Simulator
+# Production Simulator
 
 A comprehensive production simulation and management system that helps businesses model, analyze, and optimize their production processes. This tool simulates daily production operations, inventory management, and order fulfillment in a controlled environment.
 
-## 🌟 Features
+## Table of Contents
+
+- [Features](#-features)
+- [Architecture](#️-architecture)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+  - [Using Docker (Recommended)](#using-docker-recommended)
+  - [Manual Setup (Alternative)](#manual-setup-alternative)
+    - [Backend Setup](#backend-setup)
+    - [Frontend Setup](#frontend-setup)
+- [Usage](#-usage)
+- [Important Notes](#️-important-notes)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+
+## Features
 
 - **Daily Production Simulation**: Simulate production processes day by day
 - **Inventory Management**: Track and manage raw materials and finished products
@@ -11,7 +27,7 @@ A comprehensive production simulation and management system that helps businesse
 - **Interactive Dashboard**: Visualize production metrics and system state
 - **Historical Analysis**: Review past production events and performance
 
-## 🏗️ Architecture
+## Architecture
 
 The application is built with a modern tech stack:
 
@@ -20,16 +36,42 @@ The application is built with a modern tech stack:
 - **Database**: SQLAlchemy ORM
 - **Simulation Engine**: SimPy for discrete event simulation
 
-## 🔧 Prerequisites
+## Prerequisites
+
+- Docker
+- Docker Compose
+
+## Getting Started
+
+### Using Docker (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd simulator-tool
+   ```
+
+2. Build and start the containers:
+   ```bash
+   docker-compose up --build
+   ```
+
+3. Access the application:
+   - Frontend: http://localhost:4200
+   - Backend API: http://localhost:8080
+
+### Manual Setup (Alternative)
+
+If you prefer to run the application without Docker:
+
+#### Prerequisites
 
 - Python 3.10 or higher
 - Node.js 18 or higher
 - npm
 - Angular CLI (`npm install -g @angular/cli`)
 
-## 🚀 Getting Started
-
-### Backend Setup
+#### Backend Setup
 
 1. Navigate to the backend directory:
    ```bash
@@ -47,7 +89,7 @@ The application is built with a modern tech stack:
    ```
    The backend will be available at: http://localhost:8000
 
-### Frontend Setup
+#### Frontend Setup
 
 1. Navigate to the frontend directory:
    ```bash
@@ -78,8 +120,8 @@ The application is built with a modern tech stack:
 
 ## ⚠️ Important Notes
 
-- Ensure the backend server is running before starting the frontend
-- The frontend is configured to communicate with the backend at http://localhost:8000
+- The application uses Docker volumes to persist the database data
+- The frontend is configured to communicate with the backend through Docker's internal network
 - If you need to change the backend URL, update the `serverUrl` variable in the Angular service
 
 ## 🤝 Contributing

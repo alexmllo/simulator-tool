@@ -1,0 +1,298 @@
+openapi: 3.0.0
+info:
+  title: Supply Chain Simulator API
+  version: 1.0.0
+  description: API for managing and simulating supply chain operations
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /app/inventory:
+    get:
+      summary: Get inventory items
+      tags: [Inventory]
+      responses:
+        '200':
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+
+  /app/products:
+    get:
+      summary: Get all products
+      tags: [Products]
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create a new product
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product created successfully
+        '400':
+          description: Product already exists (duplicate name)
+
+  /app/production/orders:
+    get:
+      summary: Get production orders
+      tags: [Production]
+      responses:
+        '200':
+          description: List of production orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductionOrder'
+
+  /app/production/start/{order_id}:
+    post:
+      summary: Start production for an order
+      tags: [Production]
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Production started successfully
+        '500':
+          description: Internal server error
+
+  /app/purchases/orders:
+    get:
+      summary: Get purchase orders
+      tags: [Purchases]
+      responses:
+        '200':
+          description: List of purchase orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PurchaseOrder'
+
+  /app/suppliers:
+    get:
+      summary: Get suppliers
+      tags: [Suppliers]
+      responses:
+        '200':
+          description: List of suppliers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Supplier'
+
+  /app/simulator/current-day:
+    get:
+      summary: Get current simulation day
+      tags: [Simulator]
+      responses:
+        '200':
+          description: Current simulation day
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current_day:
+                    type: integer
+
+  /app/simulator/run:
+    post:
+      summary: Run one day of simulation
+      tags: [Simulator]
+      responses:
+        '200':
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+  /app/plan:
+    get:
+      summary: Get daily plans
+      tags: [Planning]
+      responses:
+        '200':
+          description: List of daily plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyPlan'
+
+  /app/events:
+    get:
+      summary: Get simulation events
+      tags: [Events]
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+
+  /app/status:
+    get:
+      summary: Get system status
+      tags: [System]
+      responses:
+        '200':
+          description: System status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  day:
+                    type: integer
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+
+    InventoryItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: number
+
+    ProductionOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        creation_date:
+          type: string
+          format: date-time
+        product_id:
+          type: integer
+        quantity:
+          type: number
+        status:
+          type: string
+        expected_completion_date:
+          type: string
+          format: date-time
+        daily_plan_id:
+          type: integer
+
+    PurchaseOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        supplier_id:
+          type: integer
+        product_id:
+          type: integer
+        quantity:
+          type: number
+        issue_date:
+          type: string
+          format: date-time
+        expected_delivery_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+
+    Supplier:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        product_id:
+          type: integer
+        unit_cost:
+          type: number
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        sim_date:
+          type: string
+          format: date-time
+        detail:
+          type: string
+
+    DailyPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+        day:
+          type: integer
+        orders:
+          type: array
+          items:
+            type: object
+            properties:
+              model:
+                type: string
+              quantity:
+                type: number
+              status:
+                type: string
+
+    SimulationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        day:
+          type: integer
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'

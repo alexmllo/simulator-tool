@@ -9,9 +9,18 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class HttpService {
+  // Use localhost when running in browser, backend service name when in container
   serverUrl = 'http://localhost:8080';
 
   constructor(private http: HttpClient) {
+  }
+
+  private handleError(error: any, message: string) {
+    console.error(message, error);
+    // Only use alert in browser environment
+    if (typeof window !== 'undefined') {
+      alert(message);
+    }
   }
 
   public getProductos(callback: (productos: Product[]) => void) {
@@ -20,7 +29,7 @@ export class HttpService {
         const productos = response.map((p) => new Product(p));
         callback(productos);
       },
-      error: () => alert('No se pudieron obtener los datos de productos')
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de productos')
     });
   }
 
@@ -30,7 +39,7 @@ export class HttpService {
         const inventario = response.map((i) => new InventoryItem(i));
         callback(inventario);
       },
-      error: () => alert('No se pudieron obtener los datos de inventario')
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de inventario')
     });
   }
 
@@ -40,9 +49,7 @@ export class HttpService {
         const compras = response.map((c) => new PurchaseOrder(c));
         callback(compras);
       },
-      error: () => {
-        alert('No se pudieron obtener los datos de compras')
-      }
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de compras')
     });
   }
 
@@ -52,7 +59,7 @@ export class HttpService {
         const pedidos = response.map((p) => new ProductionOrder(p));
         callback(pedidos);
       },
-      error: () => alert('No se pudieron obtener los datos de producción')
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de producción')
     });
   }
 
@@ -62,7 +69,7 @@ export class HttpService {
         const pedidos = response.map((p) => new DailyPlan(p));
         callback(pedidos);
       },
-      error: () => alert('No se pudieron obtener los datos de pedidos')
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de pedidos')
     });
   }
 
@@ -79,7 +86,7 @@ export class HttpService {
       next: (resp: any) => callback(new Product(resp)),
       error: (err) => {
         console.error('Error al crear el producto:', err.error);
-        alert('Error al crear el producto');
+        this.handleError(err, 'Error al crear el producto');
       }
     });
   }
@@ -96,7 +103,7 @@ export class HttpService {
       },
       error: (error) => {
         console.error('Error creating purchase order:', error);
-        alert('Error al crear la orden de compra: ' + (error.error?.detail || error.message));
+        this.handleError(error, 'Error al crear la orden de compra: ' + (error.error?.detail || error.message));
       }
     });
   }
@@ -104,21 +111,21 @@ export class HttpService {
   getBOM(productId: number, callback: (items: BOMItem[]) => void) {
     this.http.get<any>(`${this.serverUrl}/app/bom/${productId}`).subscribe({
       next: (res: any[]) => callback(res.map(x => new BOMItem(x))),
-      error: () => alert('Error al cargar la lista de materiales')
+      error: () => this.handleError(null, 'Error al cargar la lista de materiales')
     });
   }
 
   anadirMaterialABOM(productId: number, item: BOMItem, callback: () => void) {
     this.http.post(`${this.serverUrl}/app/bom/${productId}/add`, item).subscribe({
       next: () => callback(),
-      error: () => alert('No se pudo añadir el material')
+      error: () => this.handleError(null, 'No se pudo añadir el material')
     });
   }
 
   eliminarMaterialDeBOM(productId: number, materialId: number, callback: () => void) {
     this.http.delete(`${this.serverUrl}/app/bom/${productId}/remove/${materialId}`).subscribe({
       next: () => callback(),
-      error: () => alert('No se pudo eliminar el material')
+      error: () => this.handleError(null, 'No se pudo eliminar el material')
     });
   }
 
@@ -126,14 +133,14 @@ export class HttpService {
   public avanzarSimulacion(callback: (response: any) => void) {
     this.http.post(`${this.serverUrl}/app/simulator/run`, {}).subscribe({
       next: (resp: any) => callback(resp),
-      error: () => alert('Error al avanzar la simulación')
+      error: () => this.handleError(null, 'Error al avanzar la simulación')
     });
   }
 
   public getTodosLosEventos(callback: (eventos: ProductionEvent[]) => void) {
     this.http.get<any[]>(`${this.serverUrl}/app/simulator/events/all`).subscribe({
       next: (resp) => callback(resp),
-      error: () => alert('No se pudieron cargar los eventos históricos')
+      error: () => this.handleError(null, 'No se pudieron cargar los eventos históricos')
     });
   }
 
@@ -147,7 +154,7 @@ export class HttpService {
           alert(resp.result)
         }
       },
-      error: () => alert('No se pudo iniciar la producción')
+      error: () => this.handleError(null, 'No se pudo iniciar la producción')
     });
   }
 
@@ -156,7 +163,7 @@ export class HttpService {
       next: (response) => {
         callback(response);
       },
-      error: () => alert('No se pudieron obtener los datos de proveedores')
+      error: () => this.handleError(null, 'No se pudieron obtener los datos de proveedores')
     });
   }
 
@@ -165,7 +172,7 @@ export class HttpService {
       next: (response) => {
         callback(response);
       },
-      error: () => alert('No se pudo obtener el día actual de la simulación')
+      error: () => this.handleError(null, 'No se pudo obtener el día actual de la simulación')
     });
   }
 
