@@ -4,3 +4,4 @@ __pycache__/
 /frontend/.angular
 /.idea
 /app/__pycache__
+.vscode/
