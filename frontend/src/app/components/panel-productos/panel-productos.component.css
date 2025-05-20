@@ -1,0 +1,13 @@
+.note {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.formulario {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}

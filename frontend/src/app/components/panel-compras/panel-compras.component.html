@@ -49,7 +49,11 @@
     <input type="date" [value]="nuevaCompra.issue_date | date:'yyyy-MM-dd'" readonly>
 
     <label>Fecha entrega esperada:</label>
-    <input type="date" required [(ngModel)]="nuevaCompra.expected_delivery_date" name="expected_delivery_date">
+    <input type="date" 
+           required 
+           [(ngModel)]="nuevaCompra.expected_delivery_date" 
+           name="expected_delivery_date"
+           [min]="currentDay | date:'yyyy-MM-dd'">
 
     <label>Estado:</label>
     <input type="text" [value]="'Pendiente'" readonly>

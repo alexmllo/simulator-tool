@@ -50,6 +50,7 @@ export class PanelProductosComponent {
   crearProductoFinal() {
     this.nuevoProductoFinal.type = 'finished';
     this.http.crearProducto(this.nuevoProductoFinal, (creado) => {
+      alert('Producto creado. Por favor, añada al menos un material a la lista de materiales (BOM) para poder producirlo.');
       this.cargarProductos();
     });
   }
