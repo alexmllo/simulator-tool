@@ -7,8 +7,14 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from db_init import init_db
 import os
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
 
-app = FastAPI(title="Supply Chain Simulator API")
+app = FastAPI(
+    title="Supply Chain Simulator API",
+    docs_url=None,  # Disable default docs
+    redoc_url=None  # Disable default redoc
+)
 
 # Initialize database and import initial data
 init_db()
@@ -71,6 +77,15 @@ def serve_index():
             return FileResponse(index_file)
     
     return HTMLResponse("<h1>index.html no encontrado</h1>", status_code=404)
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title="Supply Chain Simulator API - Swagger UI",
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
+    )
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=True)

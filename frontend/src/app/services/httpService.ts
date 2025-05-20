@@ -10,7 +10,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class HttpService {
   // Use localhost when running in browser, backend service name when in container
-  serverUrl = typeof window !== 'undefined' ? 'http://localhost:8080' : 'http://backend:8080';
+  serverUrl = 'http://localhost:8080';
 
   constructor(private http: HttpClient) {
   }
